@@ -27,6 +27,6 @@ Qamqor/ (on progress...)
 **Clone this repository:**
 
 ```Bash
-git clone [https://github.com/YOUR_USERNAME/Qamqor-Android.git](https://github.com/YOUR_USERNAME/Qamqor-Android.git)
+git clone https://github.com/YOUR_USERNAME/Qamqor-Android.git
 ```
 Open Android Studio and select Open -> choose the cloned Qamqor directory.
