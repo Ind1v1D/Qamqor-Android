@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!--
+      The UI is 100% Jetpack Compose, so this theme only has to:
+        * have no Action Bar (we draw our own app bars),
+        * be edge-to-edge so Compose can draw behind the status/navigation bars,
+        * provide the DayNight base + the Qamqor palette for anything that is
+          still XML (splash/background before the first frame).
+    -->
+    <style name="Theme.Qamqorapp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/qamqor_bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="27">shortEdges</item>
+    </style>
+</resources>

@@ -1,0 +1,182 @@
+<resources>
+    <string name="app_name">Qamqor</string>
+
+    <!-- App-wide -->
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="close">Close</string>
+    <string name="error_required">This field is required</string>
+    <string name="error_phone">Enter a valid phone number</string>
+
+    <!-- Tabs -->
+    <string name="tab_feed">Feed</string>
+    <string name="tab_favorites">Favorites</string>
+    <string name="tab_profile">Profile</string>
+
+    <!-- First-run profile setup -->
+    <string name="setup_title">Welcome to Qamqor</string>
+    <string name="setup_subtitle">The caring place for lost and found pets in Almaty. Tell us who you are so people can reach you.</string>
+    <string name="setup_name">Your name</string>
+    <string name="setup_name_hint">Aigerim K.</string>
+    <string name="setup_phone">Phone number</string>
+    <string name="setup_phone_hint">+7 707 000 00 00</string>
+    <string name="setup_submit">Get started</string>
+
+    <!-- Feed -->
+    <string name="feed_city">Almaty</string>
+    <string name="feed_brand">Qamqor</string>
+    <string name="feed_subtitle">%1$s · %2$s</string>
+    <string name="seg_all">All</string>
+    <string name="seg_lost">Lost</string>
+    <string name="seg_found">Found</string>
+    <string name="seg_adopt">Rehoming</string>
+    <string name="chip_dogs">Dogs</string>
+    <string name="chip_cats">Cats</string>
+    <string name="feed_empty_title">Nothing here yet</string>
+    <string name="feed_empty_body">No posts match these filters. Try clearing a filter, or tap + to add the first one.</string>
+    <string name="feed_retry">Clear filters</string>
+
+    <!-- Post card / status -->
+    <string name="status_lost">Lost</string>
+    <string name="status_found">Found</string>
+    <string name="status_adopt">Rehoming</string>
+    <string name="status_solved">Solved</string>
+    <string name="cd_bookmark">Save to favorites</string>
+    <string name="cd_remove_bookmark">Remove from favorites</string>
+    <string name="cd_post_emoji">Post illustration</string>
+
+    <!-- Detail -->
+    <string name="detail_back">Back</string>
+    <string name="detail_field_breed">Breed</string>
+    <string name="detail_field_status">Status</string>
+    <string name="detail_field_marks">Distinguishing marks</string>
+    <string name="detail_field_author">Posted by</string>
+    <string name="detail_seen">Last seen %1$s</string>
+    <string name="detail_no_description">The author did not leave a description.</string>
+    <string name="detail_favorite">Favorite</string>
+    <string name="detail_unfavorite">Saved</string>
+    <string name="detail_call">Call</string>
+    <string name="detail_not_found">This post no longer exists</string>
+
+    <!-- Create -->
+    <string name="create_title">New post</string>
+    <string name="create_emoji_hint">Pick an emoji</string>
+    <string name="create_name">Name / short description</string>
+    <string name="create_name_hint">Rex, German Shepherd mix</string>
+    <string name="create_district">District</string>
+    <string name="create_district_hint">Almalinsky district</string>
+    <string name="create_phone">Contact phone</string>
+    <string name="create_phone_hint">+7 707 000 00 00</string>
+    <string name="create_description">Description</string>
+    <string name="create_description_hint">Spooked by the fireworks, ran away from the yard…</string>
+    <string name="create_submit">Publish</string>
+    <string name="create_saved">Post published</string>
+
+    <!-- Favorites -->
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_count">%1$d saved posts</string>
+    <string name="favorites_empty_title">Nothing saved yet</string>
+    <string name="favorites_empty_body">Tap ☆ on a card in the feed and the post will show up here.</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_edit">Edit profile</string>
+    <string name="stat_published">Published</string>
+    <string name="stat_solved">Solved</string>
+    <string name="stat_favorites">In favorites</string>
+    <string name="profile_my_posts">My posts</string>
+    <string name="profile_no_posts">You have not published anything yet.</string>
+    <string name="profile_mark_solved">Mark as solved</string>
+    <string name="profile_unmark_solved">Reopen post</string>
+    <string name="profile_delete">Delete post</string>
+    <string name="profile_delete_confirm">Delete this post? This cannot be undone.</string>
+    <string name="profile_signout">Sign out</string>
+    <string name="profile_signout_confirm">Your posts stay on this device, but the profile will be cleared and you will be asked to set it up again.</string>
+    <string name="profile_signout_title">Sign out?</string>
+
+    <!-- Relative time -->
+    <string name="time_just_now">just now</string>
+    <string name="time_today">today</string>
+    <string name="time_yesterday">yesterday</string>
+    <string name="time_minutes">%1$d min ago</string>
+    <string name="time_hours">%1$d h ago</string>
+
+    <!-- Districts -->
+    <string name="district_almalinsky">Almalinsky district</string>
+    <string name="district_medeusky">Medeu district</string>
+    <string name="district_bostandyk">Bostandyk district</string>
+    <string name="district_nauryzbay">Nauryzbay district</string>
+    <string name="district_turksib">Turksib district</string>
+    <string name="district_alatau">Alatau district</string>
+    <string name="district_yessil">Yessil district</string>
+    <string name="district_zarechny">Zarechny district</string>
+
+    <!-- Countable nouns -->
+    <plurals name="posts_count">
+        <item quantity="one">%d active post</item>
+        <item quantity="other">%d active posts</item>
+    </plurals>
+    <plurals name="days_count">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+    <plurals name="weeks_count">
+        <item quantity="one">%d week ago</item>
+        <item quantity="other">%d weeks ago</item>
+    </plurals>
+    <plurals name="months_count">
+        <item quantity="one">%d month ago</item>
+        <item quantity="other">%d months ago</item>
+    </plurals>
+
+    <!-- Demo content seeded on first launch (data/Seed.kt). These are user-visible
+         strings like any other, so they follow the active locale. -->
+    <string name="seed_author_dauren">Dauren S.</string>
+    <string name="seed_author_madina">Madina Zh.</string>
+    <string name="seed_author_me">Aigerim K.</string>
+
+    <string name="seed_p1_name">Rex, shepherd mix</string>
+    <string name="seed_p1_breed">Shepherd mix</string>
+    <string name="seed_p1_address">Satpayev St.</string>
+    <string name="seed_p1_marks">Red collar</string>
+    <string name="seed_p1_description">Spooked by the fireworks and ran out of our yard. Calm, answers to his name, is wary of the collar — approach slowly.</string>
+
+    <string name="seed_p2_name">Ginger cat, no collar</string>
+    <string name="seed_p2_breed">Domestic shorthair</string>
+    <string name="seed_p2_address">52 Abay Ave.</string>
+    <string name="seed_p2_marks">White spot on the forehead</string>
+    <string name="seed_p2_description">Has sat by our entrance for three days and is friendly. Looks like somebody\'s pet — take her in or message the owner.</string>
+
+    <string name="seed_p3_name">Murka, 1 year, spayed</string>
+    <string name="seed_p3_breed">Domestic shorthair</string>
+    <string name="seed_p3_address">Dos shelter</string>
+    <string name="seed_p3_marks">Grey tabby coat</string>
+    <string name="seed_p3_description">Dos shelter, Bostandyk district. Litter-trained, calm and vaccinated. We are looking for a good home — already spayed.</string>
+
+    <string name="seed_p4_name">Jack, toy terrier</string>
+    <string name="seed_p4_breed">Toy terrier</string>
+    <string name="seed_p4_address">Microdistrict 4</string>
+    <string name="seed_p4_marks">Green sweater, no leash</string>
+    <string name="seed_p4_description">Ran off during a walk, spooked by a car. Small, in a green winter sweater.</string>
+
+    <string name="seed_p5_name">Barsik, 3 years, male</string>
+    <string name="seed_p5_breed">Husky mix</string>
+    <string name="seed_p5_address">Dos shelter</string>
+    <string name="seed_p5_marks">Blue eyes, left ear torn</string>
+    <string name="seed_p5_description">Friendly, walks on a long lead, good with children. Looking for a home with no other dog — he gets jealous.</string>
+
+    <string name="seed_p6_name">Barsik, owner found</string>
+    <string name="seed_p6_breed">Laika mix</string>
+    <string name="seed_p6_address">Kabanbay batyr St.</string>
+    <string name="seed_p6_marks">Blue collar</string>
+    <string name="seed_p6_description">Found! The owner took him home — thank you to everyone who responded.</string>
+
+    <string name="seed_p7_name">African grey parrot, female</string>
+    <string name="seed_p7_breed">African grey</string>
+    <string name="seed_p7_address">Tole bi St.</string>
+    <string name="seed_p7_marks">Bald left cheek, says hello</string>
+    <string name="seed_p7_description">Landed on a balcony on the 17th floor. We are keeping it at home and feeding it, looking for the owners — clearly a pet.</string>
+
+</resources>

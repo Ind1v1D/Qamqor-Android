@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Qamqor palette — mirrors the :root variables of the HTML design concept. -->
+    <color name="qamqor_bg">#F7EFDF</color>
+    <color name="qamqor_bg_dark">#1C140D</color>
+    <color name="qamqor_pine">#AE4E2A</color>
+    <color name="qamqor_pine_2">#8B3D22</color>
+    <color name="qamqor_amber">#D99A3B</color>
+    <color name="qamqor_ink">#2C2117</color>
+    <color name="qamqor_ink_dark">#F3E9DA</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+</resources>

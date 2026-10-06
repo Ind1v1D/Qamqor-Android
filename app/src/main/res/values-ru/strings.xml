@@ -1,0 +1,189 @@
+<resources>
+    <string name="app_name">Qamqor</string>
+
+    <!-- App-wide -->
+    <string name="back">Назад</string>
+    <string name="cancel">Отмена</string>
+    <string name="save">Сохранить</string>
+    <string name="delete">Удалить</string>
+    <string name="close">Закрыть</string>
+    <string name="error_required">Заполните поле</string>
+    <string name="error_phone">Введите корректный номер телефона</string>
+
+    <!-- Tabs -->
+    <string name="tab_feed">Лента</string>
+    <string name="tab_favorites">Избранное</string>
+    <string name="tab_profile">Профиль</string>
+
+    <!-- First-run profile setup -->
+    <string name="setup_title">Добро пожаловать в Qamqor</string>
+    <string name="setup_subtitle">Здесь заботятся о потерянных и найденных питомцах Алматы. Расскажите, кто вы, чтобы с вами могли связаться.</string>
+    <string name="setup_name">Ваше имя</string>
+    <string name="setup_name_hint">Айгерим К.</string>
+    <string name="setup_phone">Номер телефона</string>
+    <string name="setup_phone_hint">+7 707 000 00 00</string>
+    <string name="setup_submit">Начать</string>
+
+    <!-- Feed -->
+    <string name="feed_city">Алматы</string>
+    <string name="feed_brand">Qamqor</string>
+    <string name="feed_subtitle">%1$s · %2$s</string>
+    <string name="seg_all">Все</string>
+    <string name="seg_lost">Потеряно</string>
+    <string name="seg_found">Найдено</string>
+    <string name="seg_adopt">Пристройство</string>
+    <string name="chip_dogs">Собаки</string>
+    <string name="chip_cats">Кошки</string>
+    <string name="feed_empty_title">Пока пусто</string>
+    <string name="feed_empty_body">Под эти фильтры ничего не подходит. Попробуйте убрать фильтр или нажмите +, чтобы добавить первое объявление.</string>
+    <string name="feed_retry">Сбросить фильтры</string>
+
+    <!-- Post card / status -->
+    <string name="status_lost">Потерян</string>
+    <string name="status_found">Найден</string>
+    <string name="status_adopt">Пристройство</string>
+    <string name="status_solved">Решено</string>
+    <string name="cd_bookmark">Добавить в избранное</string>
+    <string name="cd_remove_bookmark">Убрать из избранного</string>
+    <string name="cd_post_emoji">Иллюстрация объявления</string>
+
+    <!-- Detail -->
+    <string name="detail_back">Назад</string>
+    <string name="detail_field_breed">Порода</string>
+    <string name="detail_field_status">Статус</string>
+    <string name="detail_field_marks">Особые приметы</string>
+    <string name="detail_field_author">Опубликовал</string>
+    <string name="detail_seen">Видели %1$s</string>
+    <string name="detail_no_description">Автор не оставил описание.</string>
+    <string name="detail_favorite">В избранное</string>
+    <string name="detail_unfavorite">Сохранено</string>
+    <string name="detail_call">Позвонить</string>
+    <string name="detail_not_found">Это объявление больше недоступно</string>
+
+    <!-- Create -->
+    <string name="create_title">Новый пост</string>
+    <string name="create_emoji_hint">Выберите эмодзи</string>
+    <string name="create_name">Кличка / краткое описание</string>
+    <string name="create_name_hint">Рекс, метис овчарки</string>
+    <string name="create_district">Район</string>
+    <string name="create_district_hint">Алмалинский р-н</string>
+    <string name="create_phone">Телефон для связи</string>
+    <string name="create_phone_hint">+7 707 000 00 00</string>
+    <string name="create_description">Описание</string>
+    <string name="create_description_hint">Испугался салюта, убежал со двора…</string>
+    <string name="create_submit">Опубликовать</string>
+    <string name="create_saved">Объявление опубликовано</string>
+
+    <!-- Favorites -->
+    <string name="favorites_title">Избранное</string>
+    <string name="favorites_count">%1$d сохранённых объявлений</string>
+    <string name="favorites_empty_title">Здесь пока пусто</string>
+    <string name="favorites_empty_body">Нажмите ☆ на карточке в ленте — объявление появится здесь.</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Профиль</string>
+    <string name="profile_edit">Изменить профиль</string>
+    <string name="stat_published">Опубликовано</string>
+    <string name="stat_solved">Решено</string>
+    <string name="stat_favorites">В избранном</string>
+    <string name="profile_my_posts">Мои посты</string>
+    <string name="profile_no_posts">Вы ещё ничего не публиковали.</string>
+    <string name="profile_mark_solved">Отметить решённым</string>
+    <string name="profile_unmark_solved">Вернуть в работу</string>
+    <string name="profile_delete">Удалить пост</string>
+    <string name="profile_delete_confirm">Удалить это объявление? Отменить действие нельзя.</string>
+    <string name="profile_signout">Выйти</string>
+    <string name="profile_signout_confirm">Ваши посты останутся на устройстве, но профиль будет очищен — его придётся заполнить заново.</string>
+    <string name="profile_signout_title">Выйти?</string>
+
+    <!-- Relative time -->
+    <string name="time_just_now">только что</string>
+    <string name="time_today">сегодня</string>
+    <string name="time_yesterday">вчера</string>
+    <string name="time_minutes">%1$d мин назад</string>
+    <string name="time_hours">%1$d ч назад</string>
+
+    <!-- Districts -->
+    <string name="district_almalinsky">Алмалинский р-н</string>
+    <string name="district_medeusky">Медеуский р-н</string>
+    <string name="district_bostandyk">Бостандыкский р-н</string>
+    <string name="district_nauryzbay">Наурызбайский р-н</string>
+    <string name="district_turksib">Турксибский р-н</string>
+    <string name="district_alatau">Алатауский р-н</string>
+    <string name="district_yessil">Есіль р-н</string>
+    <string name="district_zarechny">Заречный р-н</string>
+
+    <!-- Countable nouns -->
+    <plurals name="posts_count">
+        <item quantity="one">%d активное объявление</item>
+        <item quantity="few">%d активных объявления</item>
+        <item quantity="many">%d активных объявлений</item>
+        <item quantity="other">%d активного объявления</item>
+    </plurals>
+    <plurals name="days_count">
+        <item quantity="one">%d день назад</item>
+        <item quantity="few">%d дня назад</item>
+        <item quantity="many">%d дней назад</item>
+        <item quantity="other">%d дня назад</item>
+    </plurals>
+    <plurals name="weeks_count">
+        <item quantity="one">%d неделю назад</item>
+        <item quantity="few">%d недели назад</item>
+        <item quantity="many">%d недель назад</item>
+        <item quantity="other">%d недели назад</item>
+    </plurals>
+    <plurals name="months_count">
+        <item quantity="one">%d месяц назад</item>
+        <item quantity="few">%d месяца назад</item>
+        <item quantity="many">%d месяцев назад</item>
+        <item quantity="other">%d месяца назад</item>
+    </plurals>
+
+    <!-- Демо-контент, засеваемый при первом запуске (data/Seed.kt). -->
+    <string name="seed_author_dauren">Даурен С.</string>
+    <string name="seed_author_madina">Мадина Ж.</string>
+    <string name="seed_author_me">Айгерим К.</string>
+
+    <string name="seed_p1_name">Рекс, метис овчарки</string>
+    <string name="seed_p1_breed">Метис овчарки</string>
+    <string name="seed_p1_address">ул. Сатпаева</string>
+    <string name="seed_p1_marks">Красный ошейник</string>
+    <string name="seed_p1_description">Испугался салюта и убежал со двора возле дома. Спокойный, отзывается на кличку, ошейника испугается — подходить медленно.</string>
+
+    <string name="seed_p2_name">Рыжая кошка, без ошейника</string>
+    <string name="seed_p2_breed">Беспородная</string>
+    <string name="seed_p2_address">пр. Абая, 52</string>
+    <string name="seed_p2_marks">Белое пятно на лбу</string>
+    <string name="seed_p2_description">Сидит у подъезда третий день, к людям идёт охотно. Похожа на чью-то домашнюю — заберите или напишите хозяину.</string>
+
+    <string name="seed_p3_name">Мурка, 1 год, стерилизована</string>
+    <string name="seed_p3_breed">Беспородная</string>
+    <string name="seed_p3_address">приют «Дос»</string>
+    <string name="seed_p3_marks">Серый полосатый окрас</string>
+    <string name="seed_p3_description">Приют «Дос», Бостандыкский район. Приучена к лотку, спокойная, привита. Отдаём в хорошие руки — стерилизация уже сделана.</string>
+
+    <string name="seed_p4_name">Джек, той-терьер</string>
+    <string name="seed_p4_breed">Той-терьер</string>
+    <string name="seed_p4_address">4-й микрорайон</string>
+    <string name="seed_p4_marks">Зелёный свитерок, без поводка</string>
+    <string name="seed_p4_description">Выбежал во время выгула, испугался машины. Маленький, в зелёном свитерке — зимний.</string>
+
+    <string name="seed_p5_name">Барсик, 3 года, кобель</string>
+    <string name="seed_p5_breed">Метис хаски</string>
+    <string name="seed_p5_address">приют «Дос»</string>
+    <string name="seed_p5_marks">Голубые глаза, левое ухо в клочок</string>
+    <string name="seed_p5_description">Добрый, гуляет на длинном поводке, с детьми ладит. Ищем дом без другой собаки — ревнив.</string>
+
+    <string name="seed_p6_name">Барсик, найден хозяин</string>
+    <string name="seed_p6_breed">Метис лайки</string>
+    <string name="seed_p6_address">ул. Кабанбай батыра</string>
+    <string name="seed_p6_marks">Синий ошейник</string>
+    <string name="seed_p6_description">Нашёлся! Хозяин забрал, спасибо всем, кто откликнулся.</string>
+
+    <string name="seed_p7_name">Попугай жако, самка</string>
+    <string name="seed_p7_breed">Жако</string>
+    <string name="seed_p7_address">ул. Толе би</string>
+    <string name="seed_p7_marks">Левая щека без пера, говорит «привет»</string>
+    <string name="seed_p7_description">Сел на балкон на 17-м этаже. Держим дома, кормим, ищем хозяев — по характеру явно домашний.</string>
+
+</resources>
