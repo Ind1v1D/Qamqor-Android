@@ -212,8 +212,6 @@ AI was used as a **mentor and pair-programmer**, not as a black box: it
 explained the architecture, reviewed layout bugs and suggested refactors, while
 every decision, edit and commit was made and verified by me.
 
-Full breakdown, prompts and examples: **[`AI_USAGE.md`](AI_USAGE.md)**
-
 ## License
 
 Educational project — SIS 3 coursework, 2026.
