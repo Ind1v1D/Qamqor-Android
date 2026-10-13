@@ -1,29 +1,31 @@
 package com.example.qamqorapp
 
+import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.qamqorapp.data.ThemeMode
 import com.example.qamqorapp.ui.navigation.AppShell
 import com.example.qamqorapp.ui.theme.QamqorTheme
+import java.util.Locale
 
-/**
- * Single Activity.
- *
- * `enableEdgeToEdge()` is what makes the spec's layout work: the status bar is
- * transparent, so the pine app bar (and the detail photo header) can run *behind*
- * the system icons while their content is inset by `WindowInsets.statusBars`.
- *
- * `SystemBarStyle.auto(...)` picks dark system icons on the light parchment theme
- * and light icons on the dark one, following the system night mode — which is why
- * both scrims are passed as arguments rather than using the `light(...)` factory
- * that would force dark icons in both modes.
- */
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate")
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 Color.TRANSPARENT,
@@ -36,10 +38,75 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
 
+        val settings = (application as QamqorApp).container.settings
+
         setContent {
-            QamqorTheme {
+            AppTheme(settings) {
                 AppShell()
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy")
+    }
+
+    private companion object {
+        /** Filter Logcat by `QamqorLifecycle` to see the rotation proof. */
+        const val TAG = "QamqorLifecycle"
+    }
+}
+
+
+@Composable
+private fun AppTheme(
+    settings: com.example.qamqorapp.data.SettingsRepository,
+    content: @Composable () -> Unit,
+) {
+    val themeMode by settings.themeMode.collectAsStateWithLifecycle()
+    val language by settings.language.collectAsStateWithLifecycle()
+
+    val darkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
+
+    val baseContext = LocalContext.current
+    val localizedContext = remember(language, baseContext) {
+        baseContext.localizedFor(language)
+    }
+
+    CompositionLocalProvider(LocalContext provides localizedContext) {
+        QamqorTheme(darkTheme = darkTheme, content = content)
+    }
+}
+
+private fun Context.localizedFor(tag: String): Context {
+    val locale = if (tag.equals("ru", ignoreCase = true)) Locale("ru") else Locale("en")
+    Locale.setDefault(locale)
+    val config = Configuration(resources.configuration)
+    config.setLocale(locale)
+    return createConfigurationContext(config)
 }
