@@ -28,27 +28,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
-
-/**
- * The form field of the design concept: **44 dp tall, 10 dp radius, parchment fill
- * with a `line` hairline, `pine` on focus or error**, plus an 11sp label above it —
- * exactly `.field label { font-size:11px }` over `.field .input { border-radius:10px;
- * padding:10px 12px; background:var(--bg) }`.
- *
- * This is built on [BasicTextField] rather than Material3's `TextField` on purpose:
- * M3's decoration box carries its own minimum height, so squeezing it into the
- * spec's 44 dp made it lay its text out taller than the wrapper and the `.clip()`
- * on this Box then sliced the glyphs off at the baseline. [BasicTextField] has no
- * opinions of its own — the wrapper decides the height, and [decorationBox] decides
- * where the placeholder, the leading/trailing slots and the text itself sit.
- *
- * @param label optional 11sp caption rendered above the box.
- * @param textTint forces the text colour (used by the dropdown so a placeholder can
- *   be ink-soft while a chosen value is full-strength ink).
- * @param onBoxClick when set, a transparent overlay absorbs every tap so the whole
- *   box behaves like a button — that is how the district menu opens without the
- *   field grabbing keyboard focus.
- */
 @Composable
 fun QamqorField(
     value: String,

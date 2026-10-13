@@ -5,15 +5,6 @@ import androidx.compose.ui.graphics.Color
 
 /*
  * The Qamqor palette.
- *
- * These are a 1:1 port of the `:root { --... }` custom properties from the HTML design
- * concept. Two groups:
- *
- *  1. Core roles that Material3 already understands (primary / background / surface …)
- *     are mapped in Theme.kt onto MaterialTheme.colorScheme.
- *  2. Brand-specific tokens that Material3 has no slot for (the status tints, the line
- *     colour, the soft backgrounds) live in QamqorColors and are read through
- *     LocalQamqorColors, so screens never hardcode a hex value.
  */
 
 // ---- Light ("pergament") ------------------------------------------------------
@@ -29,6 +20,8 @@ val AmberSoftLight = Color(0xFFF4E1BA)   // --amber-soft
 val BlueLight = Color(0xFFB0692F)        // --blue   : "found" accent
 val BlueSoftLight = Color(0xFFF1E3CE)    // --blue-soft
 val DangerSoftLight = Color(0xFFEED2BF)  // --danger-soft : "lost" accent
+
+val TextPrimaryLight = InkLight
 
 // Tag text colours picked to stay readable on the soft backgrounds above.
 val LostInkLight = Color(0xFF8A3B2A)
@@ -48,16 +41,12 @@ val AmberSoftDark = Color(0xFF3E2C15)
 val BlueSoftDark = Color(0xFF33261A)
 val DangerSoftDark = Color(0xFF3E2818)
 
+val TextPrimaryDark = InkDark
+
 val LostInkDark = Color(0xFFE9A98C)
 val FoundInkDark = Color(0xFFD4996C)
 val AdoptInkDark = Color(0xFFE3B669)
 
-/**
- * The tokens Material3's ColorScheme has no room for.
- *
- * @param isDark true when the dark palette is active — handy for one-off adjustments
- *   (e.g. a divider that must stay visible) without reaching for isSystemInDarkTheme().
- */
 data class QamqorColors(
     val isDark: Boolean,
     val pine: Color,
@@ -75,7 +64,9 @@ data class QamqorColors(
     val lostInk: Color,
     val foundInk: Color,
     val adoptInk: Color,
-)
+) {
+    val textSecondary: Color get() = inkSoft
+}
 
 val LightQamqorColors = QamqorColors(
     isDark = false,
@@ -107,7 +98,7 @@ val DarkQamqorColors = QamqorColors(
     inkSoft = InkSoftDark,
     line = LineDark,
     amberSoft = AmberSoftDark,
-    blue = Color(0xFFC8814A),      // --blue brightened for a dark background
+    blue = Color(0xFFC8814A),
     blueSoft = BlueSoftDark,
     dangerSoft = DangerSoftDark,
     lostInk = LostInkDark,
@@ -115,5 +106,7 @@ val DarkQamqorColors = QamqorColors(
     adoptInk = AdoptInkDark,
 )
 
-/** Access the brand tokens from any composable: `LocalQamqorColors.current.pine`. */
+val QamqorColorsLight = LightQamqorColors
+val QamqorColorsDark = DarkQamqorColors
+
 val LocalQamqorColors = staticCompositionLocalOf { LightQamqorColors }

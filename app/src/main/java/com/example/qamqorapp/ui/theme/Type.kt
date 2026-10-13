@@ -7,20 +7,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.qamqorapp.R
-
-/*
- * Typography.
- *
- * The design concept specifies two families:
- *   Zilla Slab — brand and headings; gives the "steadiness / protection" feel of
- *                *qamqor* (care).
- *   Inter      — the whole interface and every piece of data.
- *
- * Both are bundled as real .ttf files in res/font so the app renders identically
- * with no network access (Google Fonts' downloadable-font provider would need
- * Play Services and a network round-trip).
- */
-
 val ZillaSlab = FontFamily(
     Font(R.font.zilla_slab_medium, FontWeight.Medium),
     Font(R.font.zilla_slab_semibold, FontWeight.SemiBold),
@@ -34,7 +20,6 @@ val Inter = FontFamily(
     Font(R.font.inter_bold, FontWeight.Bold),
 )
 
-/** Text styles named after Material3's slots; the sizes come from the spec table. */
 val QamqorTypography = Typography(
     // <h1> of the concept — big serif statement.
     displaySmall = TextStyle(

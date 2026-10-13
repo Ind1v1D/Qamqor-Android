@@ -4,25 +4,6 @@ import android.content.Context
 import androidx.annotation.StringRes
 import com.example.qamqorapp.R
 import java.util.Calendar
-
-/**
- * The demo content from the design concept, so the app is readable the first time
- * it is opened instead of showing an empty list.
- *
- * Every word of it is read from string resources rather than hardcoded here:
- * these posts are *shown* to the user, so an English install must get English
- * posts instead of the Russian originals from the mockup. (The enum columns —
- * status, species, district — already resolve through their own `labelRes`.)
- *
- * Timestamps are *offsets from now* rather than fixed dates: that way the feed
- * always says «вчера» / «2 дня назад» exactly like the mockups, whether the app is
- * first launched today or in six months. The locale is sampled once, at seed time;
- * changing the system language later does not rewrite rows that are already in
- * Room — same rule every other seeded field follows.
- *
- * (java.time is deliberately avoided — minSdk 24 would require core library
- * desugaring for it; Calendar is always available.)
- */
 object Seed {
 
     private const val MINUTE = 60_000L
@@ -54,7 +35,7 @@ object Seed {
             address = context.text(R.string.seed_p1_address),
             marks = context.text(R.string.seed_p1_marks),
             description = context.text(R.string.seed_p1_description),
-            emoji = "🐕",
+            isSeed = true, emoji = "🐕",
             phone = "+7 707 000 00 00",
             author = context.text(R.string.seed_author_me),
             createdAt = atLocalTime(now, daysAgo = 1, hour = 19, minute = 5),
@@ -73,7 +54,7 @@ object Seed {
             address = context.text(R.string.seed_p2_address),
             marks = context.text(R.string.seed_p2_marks),
             description = context.text(R.string.seed_p2_description),
-            emoji = "🐈",
+            isSeed = true, emoji = "🐈",
             phone = "+7 700 111 22 33",
             author = context.text(R.string.seed_author_dauren),
             createdAt = atLocalTime(now, daysAgo = 2, hour = 11, minute = 20),
@@ -91,7 +72,7 @@ object Seed {
             address = context.text(R.string.seed_p3_address),
             marks = context.text(R.string.seed_p3_marks),
             description = context.text(R.string.seed_p3_description),
-            emoji = "🐾",
+            isSeed = true, emoji = "🐾",
             phone = "+7 707 000 00 00",
             author = context.text(R.string.seed_author_me),
             createdAt = atLocalTime(now, daysAgo = 5, hour = 10, minute = 0),
@@ -109,7 +90,7 @@ object Seed {
             address = context.text(R.string.seed_p4_address),
             marks = context.text(R.string.seed_p4_marks),
             description = context.text(R.string.seed_p4_description),
-            emoji = "🐕",
+            isSeed = true, emoji = "🐕",
             phone = "+7 705 444 55 66",
             author = context.text(R.string.seed_author_me),
             createdAt = now - 3 * HOUR,
@@ -127,7 +108,7 @@ object Seed {
             address = context.text(R.string.seed_p5_address),
             marks = context.text(R.string.seed_p5_marks),
             description = context.text(R.string.seed_p5_description),
-            emoji = "🐾",
+            isSeed = true, emoji = "🐾",
             phone = "+7 700 111 22 33",
             author = context.text(R.string.seed_author_me),
             createdAt = atLocalTime(now, daysAgo = 8, hour = 14, minute = 30),
@@ -144,7 +125,7 @@ object Seed {
             address = context.text(R.string.seed_p6_address),
             marks = context.text(R.string.seed_p6_marks),
             description = context.text(R.string.seed_p6_description),
-            emoji = "🐕",
+            isSeed = true, emoji = "🐕",
             phone = "+7 705 444 55 66",
             author = context.text(R.string.seed_author_me),
             createdAt = atLocalTime(now, daysAgo = 7, hour = 16, minute = 10),
@@ -162,7 +143,52 @@ object Seed {
             address = context.text(R.string.seed_p7_address),
             marks = context.text(R.string.seed_p7_marks),
             description = context.text(R.string.seed_p7_description),
-            emoji = "🐦",
+            isSeed = true, emoji = "🐦",
+            phone = "+7 701 222 33 44",
+            author = context.text(R.string.seed_author_madina),
+            createdAt = now - 26 * HOUR,
+            lastSeenAt = now - 26 * HOUR,
+        ),
+        Post(
+            status = PostStatus.FOUND,
+            species = Species.OTHER,
+            name = context.text(R.string.seed_p7_name),
+            breed = context.text(R.string.seed_p7_breed),
+            district = District.TURKSIB,
+            address = context.text(R.string.seed_p7_address),
+            marks = context.text(R.string.seed_p7_marks),
+            description = context.text(R.string.seed_p7_description),
+            isSeed = true, emoji = "🐦",
+            phone = "+7 701 222 33 44",
+            author = context.text(R.string.seed_author_madina),
+            createdAt = now - 26 * HOUR,
+            lastSeenAt = now - 26 * HOUR,
+        ),
+        Post(
+            status = PostStatus.FOUND,
+            species = Species.OTHER,
+            name = context.text(R.string.seed_p7_name),
+            breed = context.text(R.string.seed_p7_breed),
+            district = District.TURKSIB,
+            address = context.text(R.string.seed_p7_address),
+            marks = context.text(R.string.seed_p7_marks),
+            description = context.text(R.string.seed_p7_description),
+            isSeed = true, emoji = "🐦",
+            phone = "+7 701 222 33 44",
+            author = context.text(R.string.seed_author_madina),
+            createdAt = now - 26 * HOUR,
+            lastSeenAt = now - 26 * HOUR,
+        ),
+        Post(
+            status = PostStatus.FOUND,
+            species = Species.OTHER,
+            name = context.text(R.string.seed_p7_name),
+            breed = context.text(R.string.seed_p7_breed),
+            district = District.TURKSIB,
+            address = context.text(R.string.seed_p7_address),
+            marks = context.text(R.string.seed_p7_marks),
+            description = context.text(R.string.seed_p7_description),
+            isSeed = true, emoji = "🐦",
             phone = "+7 701 222 33 44",
             author = context.text(R.string.seed_author_madina),
             createdAt = now - 26 * HOUR,

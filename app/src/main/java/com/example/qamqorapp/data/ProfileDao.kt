@@ -8,11 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProfileDao {
-
-    /**
-     * Emits null while the profile has not been set up yet — the app shell collects
-     * this to pick the start destination (`setup` vs `feed`).
-     */
     @Query("SELECT * FROM profile WHERE id = :id")
     fun observe(id: Int): Flow<Profile?>
 

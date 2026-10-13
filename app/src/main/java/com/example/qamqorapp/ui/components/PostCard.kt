@@ -36,13 +36,6 @@ import com.example.qamqorapp.data.PostStatus
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.util.RelativeTime
-
-/**
- * The status chip on every card («Потерян» / «Найден» / «Пристройство»).
- *
- * Colour comes from the brand tokens — statuses are told apart by *tint*, never
- * by alarm red, which is the whole point of the concept's palette note.
- */
 @Composable
 fun StatusTag(status: PostStatus, modifier: Modifier = Modifier) {
     val c = LocalQamqorColors.current

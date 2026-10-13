@@ -37,8 +37,6 @@ import com.example.qamqorapp.R
 import com.example.qamqorapp.ui.components.StarOutlineIcon
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
-
-/** Routes. These are stable navigation ids — never localized. */
 object Routes {
     const val SETUP = "setup"
     const val FEED = "feed"
@@ -49,16 +47,6 @@ object Routes {
 
     fun detail(postId: Long) = "detail/$postId"
 }
-
-/**
- * The three destinations that own the bottom navigation. `detail` and `create`
- * are deliberately absent: in the concept they are full screens with no tab bar.
- *
- * @property selectedIcon the filled glyph shown when the tab is active.
- * @property unselectedIcon drawn when inactive. This is a composable rather than
- *   an [ImageVector] because `material-icons-core` ships no star *outline* — the
- *   ☆ of the favorites tab has to be [StarOutlineIcon].
- */
 private class TopLevelTab(
     val route: String,
     val labelRes: Int,
