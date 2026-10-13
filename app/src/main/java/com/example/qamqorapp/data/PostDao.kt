@@ -31,6 +31,7 @@ interface PostDao {
           AND (:status IS NULL OR status = :status)
           AND (:species IS NULL OR species = :species)
           AND (:district IS NULL OR district = :district)
+          AND (:query = '' OR name LIKE '%' || :query || '%' OR breed LIKE '%' || :query || '%')
         ORDER BY createdAt DESC
         """
     )
@@ -38,6 +39,7 @@ interface PostDao {
         status: PostStatus?,
         species: Species?,
         district: District?,
+        query: String,
     ): Flow<List<Post>>
 
     /** Favorites screen — same card component, just a different query behind it. */
@@ -93,4 +95,7 @@ interface PostDao {
 
     @Query("SELECT COUNT(*) FROM posts")
     suspend fun count(): Int
+
+    @Query("DELETE FROM posts WHERE isSeed = 1")
+    suspend fun deleteSeeded()
 }
