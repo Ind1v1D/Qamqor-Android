@@ -1,5 +1,6 @@
 package com.example.qamqorapp.ui.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qamqorapp.data.Post
@@ -29,7 +30,17 @@ data class ProfileUiState(
  */
 class ProfileViewModel(
     private val repository: PostRepository,
+    private val settings: com.example.qamqorapp.data.SettingsRepository,
 ) : ViewModel() {
+
+    /** Theme choice shown as selected in Settings (System / Light / Dark). */
+    val themeMode: StateFlow<com.example.qamqorapp.data.ThemeMode> = settings.themeMode
+
+    /** In-app language tag ("en" / "ru"). */
+    val language: StateFlow<String> = settings.language
+
+    /** Mirrors the repository's simulated-failure flag (see the debug settings row). */
+    val simulateError: StateFlow<Boolean> = repository.shouldFail
 
     val uiState: StateFlow<ProfileUiState> =
         combine(
@@ -68,5 +79,31 @@ class ProfileViewModel(
     /** Used by the edit dialog opened from the profile header. */
     fun saveProfile(name: String, phone: String) = viewModelScope.launch {
         repository.saveProfile(name.trim(), phone.trim())
+    }
+
+    fun setTheme(mode: com.example.qamqorapp.data.ThemeMode) {
+        settings.setTheme(mode)
+    }
+
+    fun setLanguage(tag: String, context: android.content.Context) = viewModelScope.launch {
+        settings.setLanguage(tag)
+        repository.reseedDemo(context)
+    }
+
+    fun setSimulateError(value: Boolean) {
+        repository.setSimulateError(value)
+    }
+
+    init {
+        Log.d(TAG, "init")
+    }
+
+    override fun onCleared() {
+        Log.d(TAG, "onCleared")
+        super.onCleared()
+    }
+
+    private companion object {
+        const val TAG = "ProfileViewModel"
     }
 }

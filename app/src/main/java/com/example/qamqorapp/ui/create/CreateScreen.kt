@@ -48,28 +48,21 @@ import com.example.qamqorapp.ui.components.QamqorTopBar
 import com.example.qamqorapp.ui.components.dashedBorder
 import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
+import com.example.qamqorapp.ui.components.SelectableChip
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
 /**
- * «Новое объявление».
- *
- * The concept's dashed «Добавить фото» box is replaced by an emoji picker — the
- * scope of this build has no photo pipeline — and the district field is a real
- * dropdown over the [District] enum rather than free text, which is exactly what
- * makes the feed's district chips possible.
- *
- * Chrome: 56 dp app bar with a back arrow, scrollable form, and the 48 dp amber
- * «Опубликовать» button pinned to the bottom (above the nav bar and the keyboard).
+ * Route: owns the ViewModel and wires publish/consume side effects. Everything
+ * else is the stateless [CreateScreen] below.
  */
 @Composable
-fun CreateScreen(
+fun CreateRoute(
     onBack: () -> Unit,
     onPublished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = qamqorViewModel<CreateViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val colors = LocalQamqorColors.current
 
     // Prefill the contact phone from the profile the first time we compose.
     LaunchedEffect(Unit) { viewModel.prefillFromProfile() }
@@ -81,6 +74,46 @@ fun CreateScreen(
             onPublished()
         }
     }
+
+    CreateScreen(
+        uiState = state,
+        onBack = onBack,
+        onStatusSelect = viewModel::selectStatus,
+        onEmojiSelect = viewModel::selectEmoji,
+        onNameChange = viewModel::onNameChange,
+        onDistrictSelect = viewModel::selectDistrict,
+        onPhoneChange = viewModel::onPhoneChange,
+        onDescriptionChange = viewModel::onDescriptionChange,
+        onSubmit = viewModel::submit,
+        modifier = modifier,
+    )
+}
+
+/**
+ * «Новое объявление» — stateless.
+ *
+ * The concept's dashed «Добавить фото» box is replaced by an emoji picker — the
+ * scope of this build has no photo pipeline — and the district field is a real
+ * dropdown over the [District] enum rather than free text, which is exactly what
+ * makes the feed's district chips possible.
+ *
+ * Chrome: 56 dp app bar with a back arrow, scrollable form, and the 48 dp amber
+ * «Опубликовать» button pinned to the bottom (above the nav bar and the keyboard).
+ */
+@Composable
+fun CreateScreen(
+    uiState: CreateUiState,
+    onBack: () -> Unit,
+    onStatusSelect: (PostStatus) -> Unit,
+    onEmojiSelect: (String) -> Unit,
+    onNameChange: (String) -> Unit,
+    onDistrictSelect: (District) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalQamqorColors.current
 
     Box(modifier = modifier.fillMaxSize().background(colors.panel)) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -111,62 +144,62 @@ fun CreateScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    CategoryChip(
+                    SelectableChip(
                         label = stringResource(R.string.seg_lost),
-                        selected = state.status == PostStatus.LOST,
-                        onClick = { viewModel.selectStatus(PostStatus.LOST) },
+                        selected = uiState.status == PostStatus.LOST,
+                        onClick = { onStatusSelect(PostStatus.LOST) },
                         modifier = Modifier.weight(1f),
                     )
-                    CategoryChip(
+                    SelectableChip(
                         label = stringResource(R.string.seg_found),
-                        selected = state.status == PostStatus.FOUND,
-                        onClick = { viewModel.selectStatus(PostStatus.FOUND) },
+                        selected = uiState.status == PostStatus.FOUND,
+                        onClick = { onStatusSelect(PostStatus.FOUND) },
                         modifier = Modifier.weight(1f),
                     )
-                    CategoryChip(
+                    SelectableChip(
                         label = stringResource(R.string.seg_adopt),
-                        selected = state.status == PostStatus.ADOPT,
-                        onClick = { viewModel.selectStatus(PostStatus.ADOPT) },
+                        selected = uiState.status == PostStatus.ADOPT,
+                        onClick = { onStatusSelect(PostStatus.ADOPT) },
                         modifier = Modifier.weight(1f),
                     )
                 }
 
                 // ---- illustration: the concept's photo box, as an emoji picker -
                 EmojiPicker(
-                    selected = state.emoji,
-                    onSelect = viewModel::selectEmoji,
+                    selected = uiState.emoji,
+                    onSelect = onEmojiSelect,
                 )
 
                 // ---- fields -------------------------------------------------
                 LabeledField(
                     label = stringResource(R.string.create_name),
-                    value = state.name,
-                    onValueChange = viewModel::onNameChange,
+                    value = uiState.name,
+                    onValueChange = onNameChange,
                     placeholder = stringResource(R.string.create_name_hint),
-                    isError = state.nameError,
+                    isError = uiState.nameError,
                     errorText = stringResource(R.string.error_required),
                 )
 
                 DistrictField(
-                    selected = state.district,
-                    isError = state.districtError,
-                    onSelect = viewModel::selectDistrict,
+                    selected = uiState.district,
+                    isError = uiState.districtError,
+                    onSelect = onDistrictSelect,
                 )
 
                 LabeledField(
                     label = stringResource(R.string.create_phone),
-                    value = state.phone,
-                    onValueChange = viewModel::onPhoneChange,
+                    value = uiState.phone,
+                    onValueChange = onPhoneChange,
                     placeholder = stringResource(R.string.create_phone_hint),
                     keyboardType = KeyboardType.Phone,
-                    isError = state.phoneError,
+                    isError = uiState.phoneError,
                     errorText = stringResource(R.string.error_phone),
                 )
 
                 LabeledField(
                     label = stringResource(R.string.create_description),
-                    value = state.description,
-                    onValueChange = viewModel::onDescriptionChange,
+                    value = uiState.description,
+                    onValueChange = onDescriptionChange,
                     placeholder = stringResource(R.string.create_description_hint),
                     minHeight = 96,
                 )
@@ -193,7 +226,7 @@ fun CreateScreen(
                     .height(Dimens.SubmitButton.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(colors.amber)
-                    .clickable(enabled = !state.isSaving) { viewModel.submit() },
+                    .clickable(enabled = !uiState.isSaving) { onSubmit() },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -207,36 +240,7 @@ fun CreateScreen(
 }
 
 /** 40 dp category chip; the selected one flips to pine, exactly like the mockup. */
-@Composable
-private fun CategoryChip(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalQamqorColors.current
-    Box(
-        modifier = modifier
-            .height(Dimens.CategoryChip.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (selected) colors.pine else Color.Transparent)
-            .border(
-                width = 1.dp,
-                color = if (selected) colors.pine else colors.line,
-                shape = RoundedCornerShape(10.dp),
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (selected) Color.White else colors.inkSoft,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
+
 
 /** The 96 dp dashed box of the concept, holding the emoji choices. */
 @Composable

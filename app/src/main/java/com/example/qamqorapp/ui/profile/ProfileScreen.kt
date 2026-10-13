@@ -44,8 +44,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.R
 import com.example.qamqorapp.data.Post
+import com.example.qamqorapp.data.ThemeMode
 import com.example.qamqorapp.ui.components.EmojiThumb
 import com.example.qamqorapp.ui.components.ResolvedTag
+import com.example.qamqorapp.ui.components.SelectableChip
 import com.example.qamqorapp.ui.components.StatusTag
 import com.example.qamqorapp.ui.dialogs.ConfirmDialog
 import com.example.qamqorapp.ui.dialogs.EditProfileDialog
@@ -54,24 +56,59 @@ import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.util.RelativeTime
 
-/**
- * «Профиль».
- *
- * Layout per the spec table: header (64 dp avatar, name, phone, tap to edit), a
- * 52 dp three-column stats strip with hairlines, a 28 dp section title, 58 dp post
- * rows with ✓ and 🗑, and a 44 dp outlined «Выйти».
- *
- * All three counters are live Room queries, so resolving a post anywhere updates
- * «Решено» without a manual refresh.
- */
+/** Route: the only composable that knows [ProfileViewModel]. */
 @Composable
-fun ProfileScreen(
+fun ProfileRoute(
     onSignOut: () -> Unit,
     onOpenPost: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = qamqorViewModel<ProfileViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+    val language by viewModel.language.collectAsStateWithLifecycle()
+    val simulateError by viewModel.simulateError.collectAsStateWithLifecycle()
+    // Only the route sees the Android context; the screen stays framework-free.
+    val context = LocalContext.current
+
+    ProfileScreen(
+        uiState = state,
+        themeMode = themeMode,
+        language = language,
+        simulateError = simulateError,
+        onOpenPost = onOpenPost,
+        onSignOut = onSignOut,
+        onSaveProfile = viewModel::saveProfile,
+        onToggleResolved = viewModel::toggleResolved,
+        onDeletePost = viewModel::delete,
+        onSetTheme = viewModel::setTheme,
+        onSetLanguage = { tag -> viewModel.setLanguage(tag, context) },
+        onToggleSimulateError = viewModel::setSimulateError,
+        modifier = modifier,
+    )
+}
+
+/**
+ * «Профиль» — stateless. The only `remember` calls left here are `showEdit` /
+ * `showSignOut`, which are pure "is this dialog open right now?" UI flags (allowed
+ * by the rule); every fact the user would mind losing lives in the ViewModel.
+ */
+@Composable
+fun ProfileScreen(
+    uiState: ProfileUiState,
+    themeMode: ThemeMode,
+    language: String,
+    simulateError: Boolean,
+    onOpenPost: (Long) -> Unit,
+    onSignOut: () -> Unit,
+    onSaveProfile: (String, String) -> Unit,
+    onToggleResolved: (Post) -> Unit,
+    onDeletePost: (Post) -> Unit,
+    onSetTheme: (ThemeMode) -> Unit,
+    onSetLanguage: (String) -> Unit,
+    onToggleSimulateError: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalQamqorColors.current
 
     var showEdit by remember { mutableStateOf(false) }
@@ -108,12 +145,12 @@ fun ProfileScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = state.profile?.name ?: "—",
+                    text = uiState.profile?.name ?: "—",
                     style = MaterialTheme.typography.titleSmall,
                     color = colors.ink,
                 )
                 Text(
-                    text = state.profile?.phone ?: "—",
+                    text = uiState.profile?.phone ?: "—",
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.inkSoft,
                 )
@@ -138,24 +175,38 @@ fun ProfileScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     StatCell(
-                        value = state.published,
+                        value = uiState.published,
                         label = stringResource(R.string.stat_published),
                         modifier = Modifier.weight(1f),
                     )
                     VerticalDivider()
                     StatCell(
-                        value = state.resolved,
+                        value = uiState.resolved,
                         label = stringResource(R.string.stat_solved),
                         modifier = Modifier.weight(1f),
                     )
                     VerticalDivider()
                     StatCell(
-                        value = state.favorites,
+                        value = uiState.favorites,
                         label = stringResource(R.string.stat_favorites),
                         modifier = Modifier.weight(1f),
                     )
                 }
             }
+
+            // ---- «Настройки»: тема, язык и демо-ошибка ---------------------
+            SettingsSection(
+                themeMode = themeMode,
+                onThemeMode = onSetTheme,
+                language = language,
+                onLanguage = onSetLanguage,
+                simulateError = simulateError,
+                onSimulateError = onToggleSimulateError,
+                modifier = Modifier.padding(
+                    horizontal = Dimens.ContentPadding.dp,
+                    vertical = 8.dp,
+                ),
+            )
 
             // ---- «Мои посты» -------------------------------------------------
             Box(
@@ -172,7 +223,7 @@ fun ProfileScreen(
                 )
             }
 
-            if (state.myPosts.isEmpty() && !state.isLoading) {
+            if (uiState.myPosts.isEmpty() && !uiState.isLoading) {
                 Text(
                     text = stringResource(R.string.profile_no_posts),
                     style = MaterialTheme.typography.bodyMedium,
@@ -190,12 +241,12 @@ fun ProfileScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    state.myPosts.forEach { post ->
+                    uiState.myPosts.forEach { post ->
                         MyPostRow(
                             post = post,
                             onClick = { onOpenPost(post.id) },
-                            onToggleResolved = { viewModel.toggleResolved(post) },
-                            onDelete = { viewModel.delete(post) },
+                            onToggleResolved = { onToggleResolved(post) },
+                            onDelete = { onDeletePost(post) },
                         )
                     }
                 }
@@ -234,11 +285,11 @@ fun ProfileScreen(
 
     if (showEdit) {
         EditProfileDialog(
-            initialName = state.profile?.name.orEmpty(),
-            initialPhone = state.profile?.phone.orEmpty(),
+            initialName = uiState.profile?.name.orEmpty(),
+            initialPhone = uiState.profile?.phone.orEmpty(),
             onDismiss = { showEdit = false },
             onSave = { name, phone ->
-                viewModel.saveProfile(name, phone)
+                onSaveProfile(name, phone)
                 showEdit = false
             },
         )
@@ -392,4 +443,134 @@ private fun RowActionButton(
     ) {
         Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(15.dp))
     }
+}
+
+/**
+ * Preference rows — theme (System / Light / Dark), language (EN / RU) and the
+ * demo error switch — rendered as the same [SelectableChip] used by the create
+ * form, so the whole app has exactly one chip component.
+ *
+ * Every chip is [Dimens.CategoryChip] tall inside a 48 dp-wide-plus tap area, and
+ * the selected one flips to pine, matching the mockup's chip treatment.
+ */
+@Composable
+fun SettingsSection(
+    themeMode: ThemeMode,
+    onThemeMode: (ThemeMode) -> Unit,
+    language: String,
+    onLanguage: (String) -> Unit,
+    simulateError: Boolean,
+    onSimulateError: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalQamqorColors.current
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(colors.panel)
+            .border(1.dp, colors.line, RoundedCornerShape(12.dp))
+            .padding(Dimens.ContentPadding.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.settings_title),
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.inkSoft,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        SettingsRow(
+            title = stringResource(R.string.settings_appearance),
+        ) {
+            ThemeChip(
+                label = stringResource(R.string.theme_system),
+                selected = themeMode == ThemeMode.SYSTEM,
+                onClick = { onThemeMode(ThemeMode.SYSTEM) },
+            )
+            ThemeChip(
+                label = stringResource(R.string.theme_light),
+                selected = themeMode == ThemeMode.LIGHT,
+                onClick = { onThemeMode(ThemeMode.LIGHT) },
+            )
+            ThemeChip(
+                label = stringResource(R.string.theme_dark),
+                selected = themeMode == ThemeMode.DARK,
+                onClick = { onThemeMode(ThemeMode.DARK) },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        SettingsRow(
+            title = stringResource(R.string.settings_language),
+        ) {
+            ThemeChip(
+                label = stringResource(R.string.lang_en),
+                selected = language == "en",
+                onClick = { onLanguage("en") },
+            )
+            ThemeChip(
+                label = stringResource(R.string.lang_ru),
+                selected = language == "ru",
+                onClick = { onLanguage("ru") },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Turns the repository's simulated failure on/off, so the error state can
+        // be demonstrated on the feed during the defense.
+        SettingsRow(
+            title = stringResource(R.string.settings_debug),
+        ) {
+            ThemeChip(
+                label = stringResource(R.string.debug_on),
+                selected = simulateError,
+                onClick = { onSimulateError(true) },
+            )
+            ThemeChip(
+                label = stringResource(R.string.debug_off),
+                selected = !simulateError,
+                onClick = { onSimulateError(false) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsRow(
+    title: String,
+    content: @Composable () -> Unit,
+) {
+    val colors = LocalQamqorColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.ink,
+            modifier = Modifier.weight(1f),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            content()
+        }
+    }
+}
+
+/** One theme/language chip, widened to the 48 dp minimum touch target. */
+@Composable
+private fun ThemeChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    SelectableChip(
+        label = label,
+        selected = selected,
+        onClick = onClick,
+        modifier = Modifier.height(40.dp),
+    )
 }

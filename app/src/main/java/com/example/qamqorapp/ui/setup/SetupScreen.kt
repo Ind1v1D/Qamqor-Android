@@ -40,21 +40,14 @@ import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
-/**
- * The first-run screen — this app's stand-in for a login.
- *
- * An empty `profile` table is what puts the shell here instead of on the feed, so
- * there is no separate "logged out" state to model: the screen simply writes the
- * row and reports `done`, and the shell swaps the start destination.
- */
+/** Route: wires the "done" side effect, then hands a plain state to the screen. */
 @Composable
-fun SetupScreen(
+fun SetupRoute(
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = qamqorViewModel<SetupViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val colors = LocalQamqorColors.current
 
     LaunchedEffect(state.done) {
         if (state.done) {
@@ -63,9 +56,25 @@ fun SetupScreen(
         }
     }
 
-    // `.phone` in the concept is `--panel` — the default surface that every
-    // screen without its own background inherits. Setup follows that rule so the
-    // parchment inputs sit *on* something.
+    SetupScreen(
+        uiState = state,
+        onNameChange = viewModel::onNameChange,
+        onPhoneChange = viewModel::onPhoneChange,
+        onSubmit = viewModel::submit,
+        modifier = modifier,
+    )
+}
+
+/** First-run setup — stateless. */
+@Composable
+fun SetupScreen(
+    uiState: SetupUiState,
+    onNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalQamqorColors.current
     Box(modifier = modifier.fillMaxSize().background(colors.panel)) {
         Column(
             modifier = Modifier
@@ -105,10 +114,10 @@ fun SetupScreen(
 
             SetupField(
                 label = stringResource(R.string.setup_name),
-                value = state.name,
-                onValueChange = viewModel::onNameChange,
+                value = uiState.name,
+                onValueChange = onNameChange,
                 placeholder = stringResource(R.string.setup_name_hint),
-                isError = state.nameError,
+                isError = uiState.nameError,
                 errorText = stringResource(R.string.error_required),
                 leading = {
                     Icon(
@@ -124,11 +133,11 @@ fun SetupScreen(
 
             SetupField(
                 label = stringResource(R.string.setup_phone),
-                value = state.phone,
-                onValueChange = viewModel::onPhoneChange,
+                value = uiState.phone,
+                onValueChange = onPhoneChange,
                 placeholder = stringResource(R.string.setup_phone_hint),
                 keyboardType = KeyboardType.Phone,
-                isError = state.phoneError,
+                isError = uiState.phoneError,
                 errorText = stringResource(R.string.error_phone),
             )
 
@@ -141,7 +150,7 @@ fun SetupScreen(
                     .height(Dimens.SubmitButton.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(colors.amber)
-                    .clickable(enabled = !state.isSaving) { viewModel.submit() },
+                    .clickable(enabled = !uiState.isSaving) { onSubmit() },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(

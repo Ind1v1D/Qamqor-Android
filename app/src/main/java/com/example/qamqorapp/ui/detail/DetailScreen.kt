@@ -32,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,39 +57,42 @@ import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.util.RelativeTime
-
 /**
- * «Карточка питомца».
- *
- * Layout per the spec table:
- *   220 dp photo header (pine -> pine-2 gradient, back button 32 dp over it)
- *   scrollable body: name, «видели вчера, 18:40», 2×2 info grid, description
- *   fixed 52 dp action row pinned to the bottom: ☆ «В избранное» + ☎ «Позвонить»
- *
- * The header grows by the status-bar inset so the gradient runs behind the system
- * icons, while the back button is pushed below them.
+ * The route: the only composable here that knows the ViewModel. The post id is no
+ * longer passed in — the ViewModel reads it from `SavedStateHandle`.
  */
 @Composable
-fun DetailScreen(
-    postId: Long,
+fun DetailRoute(
     onBack: () -> Unit,
-    onDeleted: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = qamqorViewModel<DetailViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Feed the id in once; afterwards the ViewModel owns the request.
-    LaunchedEffect(postId) { viewModel.load(postId) }
+    DetailScreen(
+        uiState = state,
+        onBack = onBack,
+        onToggleFavorite = viewModel::toggleFavorite,
+        modifier = modifier,
+    )
+}
 
+/** Stateless detail screen: draws a [DetailUiState], knows nothing about a ViewModel. */
+@Composable
+fun DetailScreen(
+    uiState: DetailUiState,
+    onBack: () -> Unit,
+    onToggleFavorite: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalQamqorColors.current
 
     when {
-        state.isLoading -> {
+        uiState.isLoading -> {
             Box(modifier = modifier.fillMaxSize().background(colors.panel))
         }
 
-        state.missing -> {
+        uiState.missing -> {
             CenteredMessage(
                 text = stringResource(R.string.detail_not_found),
                 modifier = modifier,
@@ -98,13 +100,12 @@ fun DetailScreen(
         }
 
         else -> {
-            val post = state.post ?: return
+            val post = uiState.post ?: return
             DetailContent(
                 post = post,
-                author = state.author,
+                author = uiState.author,
                 onBack = onBack,
-                onToggleFavorite = viewModel::toggleFavorite,
-                onDeleted = onDeleted,
+                onToggleFavorite = onToggleFavorite,
                 modifier = modifier,
             )
         }
@@ -117,7 +118,6 @@ private fun DetailContent(
     author: String,
     onBack: () -> Unit,
     onToggleFavorite: () -> Unit,
-    onDeleted: () -> Unit,
     modifier: Modifier,
 ) {
     val colors = LocalQamqorColors.current

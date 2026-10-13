@@ -9,6 +9,9 @@
     <string name="close">Close</string>
     <string name="error_required">This field is required</string>
     <string name="error_phone">Enter a valid phone number</string>
+    <string name="error_title">Something went wrong</string>
+    <string name="error_generic">Couldn\'t load the data. Please try again.</string>
+    <string name="retry">Retry</string>
 
     <!-- Tabs -->
     <string name="tab_feed">Feed</string>
@@ -37,6 +40,7 @@
     <string name="feed_empty_title">Nothing here yet</string>
     <string name="feed_empty_body">No posts match these filters. Try clearing a filter, or tap + to add the first one.</string>
     <string name="feed_retry">Clear filters</string>
+    <string name="feed_search_hint">Search by name or breed</string>
 
     <!-- Post card / status -->
     <string name="status_lost">Lost</string>
@@ -173,10 +177,22 @@
     <string name="seed_p6_marks">Blue collar</string>
     <string name="seed_p6_description">Found! The owner took him home — thank you to everyone who responded.</string>
 
-    <string name="seed_p7_name">African grey parrot, female</string>
+    <string name="seed_p7_name">African grey parrot sdada, female</string>
     <string name="seed_p7_breed">African grey</string>
     <string name="seed_p7_address">Tole bi St.</string>
     <string name="seed_p7_marks">Bald left cheek, says hello</string>
     <string name="seed_p7_description">Landed on a balcony on the 17th floor. We are keeping it at home and feeding it, looking for the owners — clearly a pet.</string>
 
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_language">Language</string>
+    <string name="lang_en">EN</string>
+    <string name="lang_ru">RU</string>
+    <string name="settings_debug">Demo: simulate error</string>
+    <string name="debug_on">On</string>
+    <string name="debug_off">Off</string>
 </resources>
