@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,8 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.qamqorapp.R
 import com.example.qamqorapp.ui.theme.Dimens
 
 /**
@@ -53,9 +57,6 @@ fun QamqorTopBar(
         modifier = modifier
             .fillMaxWidth()
             .background(c.pine)
-            // The real inset, not the spec's 24dp estimate: real devices range from
-            // 24 to 44dp. `background` is applied *outside* the padding, so the pine
-            // still runs edge to edge behind the system icons.
             .statusBarsPadding(),
     ) {
         if (navigationIcon != null) {
@@ -189,5 +190,65 @@ fun CenteredMessage(text: String, modifier: Modifier = Modifier) {
     val c = com.example.qamqorapp.ui.theme.LocalQamqorColors.current
     Box(modifier = modifier.fillMaxSize().background(c.bg), contentAlignment = Alignment.Center) {
         Text(text = text, style = MaterialTheme.typography.bodyMedium, color = c.inkSoft)
+    }
+}
+
+/** Spinner shown while the repository "is on the network" (the loading state). */
+@Composable
+fun LoadingState(modifier: Modifier = Modifier) {
+    val c = com.example.qamqorapp.ui.theme.LocalQamqorColors.current
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(color = c.pine)
+    }
+}
+
+/**
+ * Error state: the friendly face of a failed load, plus a Retry button.
+ *
+ * [onRetry] is a plain lambda, so this block is part of the *stateless* screen and
+ * can be shown from a `@Preview` with a fake state — no ViewModel required.
+ */
+@Composable
+fun ErrorState(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val c = com.example.qamqorapp.ui.theme.LocalQamqorColors.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp, vertical = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(text = "⚠️", style = MaterialTheme.typography.displaySmall)
+        Text(
+            text = stringResource(R.string.error_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = c.ink,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = c.inkSoft,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Box(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(c.pine)
+                .clickable(onClick = onRetry)
+                .padding(horizontal = 20.dp, vertical = 10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.retry),
+                color = Color.White,
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
     }
 }

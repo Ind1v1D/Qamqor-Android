@@ -16,15 +16,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.R
+import com.example.qamqorapp.data.Post
 import com.example.qamqorapp.ui.components.EmptyState
+import com.example.qamqorapp.ui.components.LoadingState
 import com.example.qamqorapp.ui.components.PostCard
 import com.example.qamqorapp.ui.components.QamqorTopBar
 import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
+/** Route: the only composable here that knows the ViewModel. */
+@Composable
+fun FavoritesRoute(
+    onOpenPost: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val viewModel = qamqorViewModel<FavoritesViewModel>()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    FavoritesScreen(
+        uiState = state,
+        onOpenPost = onOpenPost,
+        onRemove = viewModel::remove,
+        modifier = modifier,
+    )
+}
+
 /**
- * «Избранное».
+ * «Избранное» — stateless.
  *
  * Spec: 64 dp app bar with a counter instead of segments/chips, the *same*
  * PostCard component as the feed, and a centred empty state when the Room query
@@ -33,28 +52,30 @@ import com.example.qamqorapp.ui.theme.LocalQamqorColors
  */
 @Composable
 fun FavoritesScreen(
+    uiState: FavoritesUiState,
     onOpenPost: (Long) -> Unit,
+    onRemove: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = qamqorViewModel<FavoritesViewModel>()
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val colors = LocalQamqorColors.current
 
     Box(modifier = modifier.fillMaxSize().background(colors.bg)) {
         Column(modifier = Modifier.fillMaxSize()) {
             QamqorTopBar(
                 title = stringResource(R.string.favorites_title),
-                subtitle = stringResource(R.string.favorites_count, state.posts.size),
+                subtitle = stringResource(R.string.favorites_count, uiState.posts.size),
             )
 
-            if (state.posts.isEmpty() && !state.isLoading) {
-                EmptyState(
+            when {
+                uiState.isLoading -> LoadingState()
+
+                uiState.posts.isEmpty() -> EmptyState(
                     emoji = "☆",
                     title = stringResource(R.string.favorites_empty_title),
                     body = stringResource(R.string.favorites_empty_body),
                 )
-            } else {
-                LazyColumn(
+
+                else -> LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(
                         start = Dimens.ContentPadding.dp,
@@ -64,13 +85,13 @@ fun FavoritesScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(Dimens.CardSpacing.dp),
                 ) {
-                    items(state.posts, key = { it.id }) { post ->
+                    items(uiState.posts, key = { it.id }) { post ->
                         PostCard(
                             post = post,
                             onClick = { onOpenPost(post.id) },
                             // Tapping the star here *un*-saves it, which is the
                             // natural gesture on a "saved" list.
-                            onToggleFavorite = { viewModel.remove(post) },
+                            onToggleFavorite = { onRemove(post) },
                         )
                     }
                 }

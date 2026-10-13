@@ -9,6 +9,9 @@
     <string name="close">Закрыть</string>
     <string name="error_required">Заполните поле</string>
     <string name="error_phone">Введите корректный номер телефона</string>
+    <string name="error_title">Что-то пошло не так</string>
+    <string name="error_generic">Не удалось загрузить данные. Попробуйте ещё раз.</string>
+    <string name="retry">Повторить</string>
 
     <!-- Tabs -->
     <string name="tab_feed">Лента</string>
@@ -37,6 +40,7 @@
     <string name="feed_empty_title">Пока пусто</string>
     <string name="feed_empty_body">Под эти фильтры ничего не подходит. Попробуйте убрать фильтр или нажмите +, чтобы добавить первое объявление.</string>
     <string name="feed_retry">Сбросить фильтры</string>
+    <string name="feed_search_hint">Поиск по имени или породе</string>
 
     <!-- Post card / status -->
     <string name="status_lost">Потерян</string>
@@ -186,4 +190,16 @@
     <string name="seed_p7_marks">Левая щека без пера, говорит «привет»</string>
     <string name="seed_p7_description">Сел на балкон на 17-м этаже. Держим дома, кормим, ищем хозяев — по характеру явно домашний.</string>
 
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_appearance">Внешний вид</string>
+    <string name="theme_system">Система</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="settings_language">Язык</string>
+    <string name="lang_en">EN</string>
+    <string name="lang_ru">RU</string>
+    <string name="settings_debug">Демо: имитация ошибки</string>
+    <string name="debug_on">Вкл</string>
+    <string name="debug_off">Выкл</string>
 </resources>

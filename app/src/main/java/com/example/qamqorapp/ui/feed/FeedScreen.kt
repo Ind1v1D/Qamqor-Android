@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,9 +30,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.R
+import com.example.qamqorapp.data.District
+import com.example.qamqorapp.data.Post
+import com.example.qamqorapp.data.PostStatus
+import com.example.qamqorapp.data.Species
 import com.example.qamqorapp.ui.components.EmptyState
+import com.example.qamqorapp.ui.components.ErrorState
 import com.example.qamqorapp.ui.components.FeedFilterRow
+import com.example.qamqorapp.ui.components.LoadingState
 import com.example.qamqorapp.ui.components.PostCard
+import com.example.qamqorapp.ui.components.QamqorField
 import com.example.qamqorapp.ui.components.QamqorTopBar
 import com.example.qamqorapp.ui.components.StatusSegments
 import com.example.qamqorapp.ui.qamqorViewModel
@@ -40,22 +47,59 @@ import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
 /**
- * «Главная лента».
- *
- * Structure top-to-bottom, matching the spec table:
- *   pine app bar (status-bar inset + 64 dp brand + 36 dp segments)
- *   filter chips row (44 dp)
- *   LazyColumn of 76 dp cards — the *only* scrolling region; the header stays put
- *   56 dp FAB, 16 dp from the right and 16 dp above the bottom navigation
+ * The route is the *only* place that knows the ViewModel exists. It owns the
+ * `collectAsStateWithLifecycle()` subscription and turns every ViewModel method
+ * into a plain lambda for [FeedScreen].
  */
 @Composable
-fun FeedScreen(
+fun FeedRoute(
     onOpenPost: (Long) -> Unit,
     onCreatePost: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = qamqorViewModel<FeedViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    FeedScreen(
+        uiState = state,
+        onQueryChange = viewModel::onQueryChange,
+        onStatusSelected = viewModel::selectStatus,
+        onSpeciesClick = viewModel::toggleSpecies,
+        onDistrictSelected = viewModel::selectDistrict,
+        onClearFilters = viewModel::clearFilters,
+        onFavouriteClick = viewModel::onFavouriteClick,
+        onRetry = viewModel::onRetry,
+        onOpenPost = onOpenPost,
+        onCreatePost = onCreatePost,
+        modifier = modifier,
+    )
+}
+
+/**
+ * «Главная лента» — a **stateless** screen: it receives [uiState] plus events and
+ * draws them. It has no ViewModel, no filtering/sorting/searching logic, and can
+ * therefore be previewed in every state (see the previews in `FeedPreviews.kt`).
+ *
+ * Structure top-to-bottom, matching the spec table:
+ *   pine app bar (status-bar inset + 64 dp brand + 36 dp segments + search)
+ *   filter chips row (44 dp)
+ *   LazyColumn of cards — the *only* scrolling region; the header stays put
+ *   56 dp FAB, 16 dp from the right and 16 dp above the bottom navigation
+ */
+@Composable
+fun FeedScreen(
+    uiState: FeedUiState,
+    onQueryChange: (String) -> Unit,
+    onStatusSelected: (PostStatus?) -> Unit,
+    onSpeciesClick: (Species) -> Unit,
+    onDistrictSelected: (District?) -> Unit,
+    onClearFilters: () -> Unit,
+    onFavouriteClick: (Post) -> Unit,
+    onRetry: () -> Unit,
+    onOpenPost: (Long) -> Unit,
+    onCreatePost: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalQamqorColors.current
     val context = LocalContext.current
 
@@ -66,8 +110,8 @@ fun FeedScreen(
         stringResource(R.string.feed_city),
         context.resources.getQuantityString(
             R.plurals.posts_count,
-            state.activeCount,
-            state.activeCount,
+            uiState.activeCount,
+            uiState.activeCount,
         ),
     )
 
@@ -77,75 +121,88 @@ fun FeedScreen(
                 title = stringResource(R.string.feed_brand),
                 subtitle = subtitle,
             ) {
-                Box(modifier = Modifier.padding(
+                Column(modifier = Modifier.padding(
                     start = Dimens.ContentPadding.dp,
                     end = Dimens.ContentPadding.dp,
                     bottom = Dimens.SegmentsTopSpacing.dp,
                 )) {
                     StatusSegments(
-                        selected = state.filters.status,
-                        onSelect = viewModel::selectStatus,
+                        selected = uiState.filters.status,
+                        onSelect = onStatusSelected,
                     )
                 }
             }
 
-            FeedFilterRow(
-                species = state.filters.species,
-                district = state.filters.district,
-                onSpecies = viewModel::toggleSpecies,
-                onDistrict = viewModel::selectDistrict,
+            SearchField(
+                value = uiState.query,
+                onValueChange = onQueryChange,
+                modifier = Modifier.padding(
+                    horizontal = Dimens.ContentPadding.dp,
+                    vertical = 8.dp,
+                ),
             )
 
-            if (state.posts.isEmpty() && !state.isLoading) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                ) {
-                    item {
-                        EmptyState(
-                            emoji = "🐾",
-                            title = stringResource(R.string.feed_empty_title),
-                            body = stringResource(R.string.feed_empty_body),
-                            actionLabel = if (state.filters.isActive) {
-                                stringResource(R.string.feed_retry)
-                            } else {
-                                null
-                            },
-                            onAction = if (state.filters.isActive) {
-                                { viewModel.clearFilters() }
-                            } else {
-                                null
-                            },
-                        )
+            FeedFilterRow(
+                species = uiState.filters.species,
+                district = uiState.filters.district,
+                onSpecies = onSpeciesClick,
+                onDistrict = onDistrictSelected,
+            )
+
+            // The four situations, in priority order. Each branch is a plain
+            // composable fed by the fake-able UiState.
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                when {
+                    uiState.isLoading -> LoadingState()
+
+                    uiState.hasError -> ErrorState(
+                        message = uiState.errorMessage ?: stringResource(R.string.error_generic),
+                        onRetry = onRetry,
+                    )
+
+                    uiState.isEmpty -> LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 8.dp),
+                    ) {
+                        item {
+                            EmptyState(
+                                emoji = "🐾",
+                                title = stringResource(R.string.feed_empty_title),
+                                body = stringResource(R.string.feed_empty_body),
+                                actionLabel = if (uiState.isFiltered) {
+                                    stringResource(R.string.feed_retry)
+                                } else {
+                                    null
+                                },
+                                onAction = if (uiState.isFiltered) onClearFilters else null,
+                            )
+                        }
                     }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = Dimens.ContentPadding.dp,
-                        end = Dimens.ContentPadding.dp,
-                        top = Dimens.CardSpacing.dp,
-                        // Leaves room for the FAB so the last card is not hidden.
-                        bottom = Dimens.FabSize.dp + Dimens.ContentPadding.dp * 2,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(Dimens.CardSpacing.dp),
-                ) {
-                    items(state.posts, key = { it.id }) { post ->
-                        PostCard(
-                            post = post,
-                            onClick = { onOpenPost(post.id) },
-                            onToggleFavorite = { viewModel.toggleFavorite(post) },
-                        )
+
+                    else -> LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = Dimens.ContentPadding.dp,
+                            end = Dimens.ContentPadding.dp,
+                            top = Dimens.CardSpacing.dp,
+                            // Leaves room for the FAB so the last card is not hidden.
+                            bottom = Dimens.FabSize.dp + Dimens.ContentPadding.dp * 2,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(Dimens.CardSpacing.dp),
+                    ) {
+                        items(uiState.posts, key = { it.id }) { post ->
+                            PostCard(
+                                post = post,
+                                onClick = { onOpenPost(post.id) },
+                                onToggleFavorite = { onFavouriteClick(post) },
+                            )
+                        }
                     }
                 }
             }
         }
 
         // FAB: 56×56, 16dp from the right edge and 16dp above the bottom bar.
-        // The NavHost is *already* inset by the bottom-bar height (bar + gesture
-        // inset), so this screen's frame ends exactly where the tab bar starts —
-        // only the 16dp offset from the spec remains to be applied here.
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -168,4 +225,37 @@ fun FeedScreen(
             )
         }
     }
+}
+
+/** The search box: its text lives in the ViewModel, so it survives rotation. */
+@Composable
+private fun SearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalQamqorColors.current
+    QamqorField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        placeholder = stringResource(R.string.feed_search_hint),
+        containerColor = colors.panel,
+        leading = {
+            Text(text = "🔍", style = MaterialTheme.typography.bodyMedium)
+        },
+        trailing = {
+            if (value.isNotEmpty()) {
+                Text(
+                    text = "✕",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.inkSoft,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable { onValueChange("") }
+                        .padding(4.dp),
+                )
+            }
+        },
+    )
 }

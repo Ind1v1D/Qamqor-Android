@@ -1,5 +1,7 @@
 package com.example.qamqorapp.ui.detail
 
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qamqorapp.data.Post
@@ -28,17 +30,28 @@ data class DetailUiState(
 /**
  * Detail screen.
  *
- * The id arrives as a `Long` argument; [flatMapLatest] re-subscribes when it
- * changes and emits `null` after a deletion, which the screen renders as
- * «Это объявление больше недоступно» instead of crashing.
+ * The id arrives through [SavedStateHandle] (the `detail/{postId}` navigation
+ * argument), not as a call parameter — which means it also survives process death,
+ * not only rotation. [flatMapLatest] re-subscribes when it changes and emits `null`
+ * after a deletion, which the screen renders as «Это объявление больше недоступно»
+ * instead of crashing.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModel(
     private val repository: PostRepository,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val postId = MutableStateFlow(NO_ID)
+    /** Read straight from the nav argument; `-1` when the screen was opened wrong. */
+    private val postId = MutableStateFlow(savedStateHandle.get<Long>(ARG_POST_ID) ?: NO_ID)
     private val authorCache = MutableStateFlow<String?>(null)
+
+    init {
+        Log.d(TAG, "init (postId=${postId.value})")
+        viewModelScope.launch {
+            authorCache.value = repository.currentProfile()?.name
+        }
+    }
 
     val uiState: StateFlow<DetailUiState> =
         combine(
@@ -69,14 +82,6 @@ class DetailViewModel(
             initialValue = DetailUiState(),
         )
 
-    fun load(id: Long) {
-        if (postId.value == id) return
-        postId.value = id
-        viewModelScope.launch {
-            authorCache.value = repository.currentProfile()?.name
-        }
-    }
-
     fun toggleFavorite() {
         val id = postId.value
         if (id == NO_ID) return
@@ -98,7 +103,14 @@ class DetailViewModel(
         }
     }
 
+    override fun onCleared() {
+        Log.d(TAG, "onCleared")
+        super.onCleared()
+    }
+
     companion object {
         const val NO_ID = -1L
+        const val ARG_POST_ID = "postId"
+        private const val TAG = "DetailViewModel"
     }
 }
