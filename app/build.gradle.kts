@@ -38,6 +38,14 @@ android {
     buildFeatures {
         compose = true
     }
+    // Local unit tests run against the Android SDK stubs, where every platform
+    // method throws "not mocked". `returnDefaultValues` makes them no-op instead,
+    // so a ViewModel that calls `Log.d` in `init` is still testable on the JVM.
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 kotlin {
@@ -61,6 +69,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.room.runtime)
@@ -68,6 +77,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 
