@@ -1,217 +1,134 @@
-# Qamqor — Lost, Found & Adoption Pet Board for Almaty
+# Qamqor 🐾
 
-> A native Android app that replaces chaotic social-media chat posts with a
-> structured, category-based board for lost, found and adoptable pets in Almaty.
+Qamqor is a small Android app for **lost & found pets in Almaty**: a feed of lost,
+found and rehoming announcements, a detail screen, a publish form, favourites and a
+profile — all written in **Kotlin + Jetpack Compose**, following **MVVM**
+(View → ViewModel → Repository) with a unidirectional data flow.
 
-| Light theme | Dark theme |
-| --- | --- |
-| ![Feed (light)](README/screenshots/01_feed_light.png) | ![Feed (dark)](README/screenshots/01_feed_dark.png) |
-
----
-
-## Table of contents
-
-- [Overview](#overview)
-- [Screens](#screens)
-- [Features](#features)
-- [Tech stack](#tech-stack)
-- [Architecture](#architecture)
-- [Project structure](#project-structure)
-- [Navigation](#navigation)
-- [Design system](#design-system)
-- [Localization](#localization)
-- [Build and run](#build-and-run)
-- [Demo script](#demo-script)
-- [Known limitations](#known-limitations)
-- [Design concept and sketches](#design-concept-and-sketches)
-- [AI usage](#ai-usage)
-
----
-
-## Overview
-
-**Qamqor** («Қамқор» — *care*) is a single-user, offline-first pet listing app.
-
-- **No login.** A local profile is created on the first run.
-- **No network.** Everything is stored in a Room database on the device.
-- **No photo upload.** Emojis act as photo placeholders (see [limitations](#known-limitations)).
+Built for SIS 3 (screens & styling) and refactored for **SIS 4 (MVVM)**.
 
 ## Screens
 
-| # | Screen | Route | Purpose |
-| --- | --- | --- | --- |
-| 1 | **Setup** | `setup` | First-run profile (name + phone) |
-| 2 | **Feed** | `feed` | All posts, status segments, filters, search |
-| 3 | **Detail** | `detail/{postId}` | Full post, info cells, call / WhatsApp / Telegram |
-| 4 | **Create** | `create` | New post form (category, status, district, emoji) |
-| 5 | **Favorites** | `favorites` | Saved posts |
-| 6 | **Profile** | `profile` | Own posts, edit profile, sign out |
+| | |
+|---|---|
+| ![Setup](design/01-setup.png) | ![Feed](design/02-feed.png) |
+| ![Detail](design/03-detail.png) | ![Create](design/04-create.png) |
+| ![Favorites](design/05-favorites.png) | ![Profile](design/06-profile.png) |
 
-Every screen is wrapped in a `Scaffold` with a `TopAppBar`; every screen except
-the start screen has a working back button.
+## Architecture (MVVM)
 
-## Features
-
-- 🐾 Status segments — **Lost / Found / Adoption** — with a tap counter
-- 🔍 Search by title + filters by category and district (chips)
-- ⭐ Favorites with an empty state
-- 📝 Create-post form with validation and a pinned submit bar
-- 📞 Contact actions via Android intents (`Intent.ACTION_DIAL`, WhatsApp, Telegram)
-- 🌓 Full **dark mode** support driven by the system setting
-- 🔤 Two languages — **English (default)** and **Russian**
-- 📜 Optimized lists: `LazyColumn` (posts) and `LazyRow` (chips)
-- ♿ Touch targets ≥ 48 dp, title text truncates with an ellipsis
-
-## Tech stack
-
-| Layer | Choice |
-| --- | --- |
-| Language | Kotlin |
-| UI | Jetpack Compose + Material 3 |
-| Architecture | MVVM (`StateFlow` → `collectAsStateWithLifecycle`) |
-| Persistence | Room (DAO, entities, `Flow`) |
-| Navigation | Navigation Compose with a `postId` argument |
-| DI | Manual (`AppContainer` + ViewModel factory) — no Hilt |
-| Build | AGP 9.4.1, built-in Kotlin, version catalog (`libs.versions.toml`) |
-| State | `remember { mutableStateOf(...) }` inside screens, hoisted flows in ViewModels |
-
-## Architecture
+The full diagram, the UiState fields, the events and the trace live in
+[`design/07-architecture.md`](design/07-architecture.md). The short version:
 
 ```
-UI (Compose)  ── observes ──▶  ViewModel (StateFlow)
-     │                                │
-     │ emits events                   │ calls
-     ▼                                ▼
-   Route  ◀── Navigation ───────  Repository ◀── Room DAO
+View (stateless)        Route                    ViewModel                Repository
+FeedScreen(uiState, …) ─ FeedRoute ────────────► FeedViewModel ─────────► PostRepository (interface)
+   events ↑             collectAsStateWithLifecycle  _uiState: MutableStateFlow     │
+   state  ↓                                          uiState  : StateFlow           ▼
+                                                                              RoomPostRepository
+                                                                              (delay + shouldFail)
+                                                                              qamqor.db
 ```
 
-- **Single Activity** (`MainActivity`) hosts `AppShell` → `NavHost`.
-- `AppContainer` (in `QamqorApp`) owns the database and repository; ViewModels
-  receive it through `QamqorFactory`.
-- The database is **seeded on cold start** with demo posts so the app is never
-  empty on first launch.
+- **View** — `ui/**/…Screen.kt` composables take `uiState` + lambdas and hold **no
+  business logic**. They never import a ViewModel.
+- **Route** — a tiny `…Route` composable (e.g. `FeedRoute`, `DetailRoute`) is the
+  only place that knows the ViewModel: it calls `qamqorViewModel<…>()`,
+  `collectAsStateWithLifecycle()` and passes methods as lambdas.
+- **ViewModel** — one per screen. State is a private `MutableStateFlow<…UiState>`
+  exposed as a read-only `StateFlow`, always updated with `copy()`.
+- **Domain** — `GetFeedUseCase`, `ToggleFavoriteUseCase` ("the recipe book").
+- **Repository** — `PostRepository` (interface) / `RoomPostRepository`, the single
+  owner of the data. It behaves like a server: every read `delay(600)`s, and it can
+  throw on demand (`shouldFail`).
 
-## Project structure
+### Trace one click (real names)
+
+Tapping the star on a feed card:
 
 ```
-app/src/main/java/com/example/qamqorapp/
-├── MainActivity.kt          # single Activity, edge-to-edge setup
-├── QamqorApp.kt             # Application + manual DI container
-├── data/
-│   ├── db/                  # Room: entity, DAO, database
-│   ├── model/               # Post, PostStatus, PostCategory, District
-│   ├── Seed.kt              # demo content (localized strings)
-│   └── PostRepository.kt
-└── ui/
-    ├── navigation/          # AppShell (NavHost), BottomBar, Routes
-    ├── components/          # reusable composables + @Preview
-    ├── theme/               # Color, Type, Theme, Dimens, Spacing
-    ├── feed/ detail/ create/ favorites/ profile/ setup/
-    └── QamqorViewModel.kt   # factory / shared state glue
+PostCard.onToggleFavorite
+  → FeedScreen's lambda onFavouriteClick(post)          (ui/feed/FeedScreen.kt)
+  → FeedViewModel.onFavouriteClick(post)                (ui/feed/FeedViewModel.kt)
+  → ToggleFavoriteUseCase(post)                         (domain/ToggleFavoriteUseCase.kt)
+  → PostRepository.toggleFavorite(post)                 (data/RoomPostRepository.kt)
+  → Room UPDATE posts SET isFavorite …  → re-emits the feed Flow
+  → FeedViewModel.render(FeedResult.Content) → _uiState.update { it.copy(posts = …) }
+  → FeedRoute.collectAsStateWithLifecycle() → FeedScreen recomposes (star flips)
 ```
 
-## Navigation
+### The four states
 
-```kotlin
-NavHost(navController, startDestination = Routes.Setup) {
-    composable(Routes.Feed)
-    composable(Routes.Favorites)
-    composable(Routes.Profile)
-    composable(Routes.Create)
-    composable(
-        route = "detail/{postId}",
-        arguments = listOf(navArgument("postId") { type = NavType.LongType })
-    ) { backStackEntry ->
-        DetailScreen(
-            postId = backStackEntry.arguments?.getLong("postId") ?: -1L,
-            onBack = { navController.popBackStack() }
-        )
-    }
-}
+`FeedUiState` covers everything the assignment asks for:
+
+| Situation | How it is expressed | Preview |
+|---|---|---|
+| loading | `isLoading = true` | `FeedPreviews.kt` → "Feed · loading" |
+| content | `isContent` (non-empty list) | "Feed · content" |
+| empty | `isEmpty` (loaded, no matches) | "Feed · empty" |
+| error | `errorMessage != null` (`hasError`) | "Feed · error (dark)" |
+
+Open `ui/feed/FeedPreviews.kt` in Android Studio: all four states render without
+running the app, which is the proof the screen no longer depends on the ViewModel.
+
+## Simulating an error
+
+**Profile → Settings → "Demo: simulate error" → On.** The next feed load fails
+after the 600 ms delay and the feed shows the error state with a **Retry** button;
+switch it Off (or tap Retry) to recover.
+
+## State survives rotation
+
+Search text, filters and favourites live in the ViewModel / Room, so they are kept
+when the Activity is recreated.
+
+Logcat while rotating the phone (`adb logcat -s QamqorLifecycle QamqorVM`):
+
+```
+D/QamqorLifecycle: onPause
+D/QamqorLifecycle: onStop
+D/QamqorLifecycle: onDestroy          <- the Activity is thrown away…
+D/QamqorLifecycle: onCreate           <- …and rebuilt for the new orientation
+D/QamqorLifecycle: onStart
+D/QamqorLifecycle: onResume
 ```
 
-The bottom bar is hidden on `setup`, `create` and `detail` so the pinned
-action bars do not overlap it.
+Notice what is **not** there: `FeedViewModel init` and `onCleared` do not appear
+again. The Activity was destroyed and recreated, but the ViewModel was not. A
+ViewModel lives in a `ViewModelStore` that the framework keeps across a
+configuration change (it is handed to the new Activity instead of being rebuilt),
+so `FeedViewModel` — and with it the private `MutableStateFlow` holding the search
+text and the filters — is the same object on the other side of the rotation.
+`onCleared` only runs when the screen is really finished (e.g. leaving it for good),
+which is why it is absent here.
 
-## Design system
+## Testing
 
-Ported 1:1 from the HTML design concept (see `/design`).
-
-**Palette**
-
-| Token | Light | Dark | Used for |
-| --- | --- | --- | --- |
-| `pine` | `#AE4E2A` | `#B65A33` | App bars, primary actions |
-| `pine-2` | `#8B3D22` | `#7A3319` | Gradient end, pressed state |
-| `amber` | `#D99A3B` | `#DFA84C` | The single bright accent, FAB |
-| `bg` | `#F7EFDF` | `#1C140D` | Screen background |
-| `panel` | `#FFF9EE` | `#241B11` | Cards, panels |
-| `line` | `#E3D7C1` | `#3A2C1E` | Hairlines, borders |
-
-All colours live in `ui/theme/Color.kt` and are read through
-`LocalQamqorColors` — **screens contain no hardcoded colours, font sizes or
-spacing values**; sizes are in `Dimens`, spacing in `Spacing`, type in `Type.kt`.
-
-**Typography** — *Zilla Slab* for headings, *Inter* for body text.
-
-**Accessibility** — every interactive element is at least **48 × 48 dp**;
-images/emojis expose `contentDescription`.
-
-## Localization
-
-| Locale | Folder | Default |
-| --- | --- | --- |
-| English | `app/src/main/res/values/strings.xml` | ✅ |
-| Russian | `app/src/main/res/values-ru/strings.xml` | — |
-
-All user-facing text **and** the seeded demo content come from string
-resources, so switching the system language re-seeds readable content.
-
-## Build and run
-
-**Prerequisites:** Android Studio (bundled JDK).
-
-```bash
-# Debug build
-gradlew assembleDebug
-
-# Install on a connected device / emulator
-gradlew installDebug
+```
+./gradlew test
 ```
 
-Or just open the project in Android Studio and press **Run ▶**.
+`app/src/test/…/ui/feed/FeedViewModelTest.kt` unit-tests the feed ViewModel against
+a hand-written fake `PostRepository` (loading→content, the error state, retry,
+search and the empty state) — no emulator needed.
 
-## Demo script
+## Where the data is stored
 
-1. **Setup** — enter a name and phone number → *Save*.
-2. **Feed** — switch the status segments, scroll the list, tap a filter chip.
-3. **Detail** — open a post, press *Call*, go **back**.
-4. **Create** — fill the form, pick a category/status/district → *Publish*.
-5. **Favorites** — star a post, view it in the Favorites tab.
-6. **Profile** — see your posts, edit the profile, try the dark theme
-   (system → *Dark theme*) — colours switch automatically.
+- **Room** database `qamqor.db` (tables `posts`, `profile`) — on device only, at
+  `/data/data/com.example.qamqorapp/databases/qamqor.db`. Not in the repo or the APK.
+- **SharedPreferences** `settings_prefs` — the theme and language choice.
 
-## Known limitations
+## Build & run
 
-- **No real photos.** Emojis act as placeholders; adding Coil + a photo picker
-  is the next step.
-- **No accounts / no backend.** The profile lives on the device only.
-- **Seeded data is re-created** after clearing app storage
-  (`adb shell pm clear com.example.qamqorapp`).
+```
+./gradlew assembleDebug     # build
+./gradlew installDebug      # install on a connected device/emulator
+```
 
-## Design concept and sketches
+Requires Android Studio / JDK 17+. `minSdk 24`, `targetSdk 37`.
 
-- `/design` — labeled layout sketches for all six screens
-  (`01-setup.png` … `06-profile.png`).
-- The HTML design concept (palette, spacing and component specs) was the
-  source of truth for the Compose theme.
+## Origin of the work
 
-## AI usage
-
-AI was used as a **mentor and pair-programmer**, not as a black box: it
-explained the architecture, reviewed layout bugs and suggested refactors, while
-every decision, edit and commit was made and verified by me.
-
-## License
-
-Educational project — SIS 3 coursework, 2026.
+This implementation was written with AI assistance; see
+[`AI_USAGE.md`](AI_USAGE.md) for what was generated, what was changed, and one place
+where the AI put logic in the wrong layer.
