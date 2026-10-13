@@ -1,5 +1,6 @@
 package com.example.qamqorapp.ui.feed
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qamqorapp.data.District
@@ -7,13 +8,24 @@ import com.example.qamqorapp.data.Post
 import com.example.qamqorapp.data.PostRepository
 import com.example.qamqorapp.data.PostStatus
 import com.example.qamqorapp.data.Species
+import com.example.qamqorapp.domain.GetFeedUseCase
+import com.example.qamqorapp.domain.ToggleFavoriteUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** The three independent filters of the feed screen, before they hit SQL. */
@@ -26,66 +38,150 @@ data class FeedFilters(
         get() = status != null || species != null || district != null
 }
 
+/**
+ * The "order board" of the feed screen — one immutable snapshot of everything the
+ * View draws. Only `val` properties: the View can never mutate it, it can only ask
+ * the ViewModel for a new one.
+ *
+ * The four situations the assignment asks for are derived from three flags:
+ *  - **loading** → [isLoading]
+ *  - **error**   → [errorMessage] != null
+ *  - **empty**   → [isEmpty] (a successful load that matched nothing)
+ *  - **content** → [isContent]
+ */
 data class FeedUiState(
+    val query: String = "",
     val filters: FeedFilters = FeedFilters(),
     val posts: List<Post> = emptyList(),
     val activeCount: Int = 0,
     val isLoading: Boolean = true,
-)
+    val errorMessage: String? = null,
+) {
+    val hasError: Boolean get() = errorMessage != null
+    val isEmpty: Boolean get() = !isLoading && errorMessage == null && posts.isEmpty()
+    val isContent: Boolean get() = !isLoading && errorMessage == null && posts.isNotEmpty()
+
+    /** True when a search or a filter is narrowing the feed. */
+    val isFiltered: Boolean get() = filters.isActive || query.isNotBlank()
+}
 
 /**
- * Feed screen state.
+ * Feed screen state (the "chef").
  *
- * The filters live in a [MutableStateFlow] and `flatMapLatest` re-subscribes the
- * underlying Room query whenever they change, so changing a segment or a chip
- * re-runs the SQL — filtering never happens on the main thread over a full table.
+ * The single source of truth is the private [MutableStateFlow] `_uiState`; the
+ * screen only ever sees the read-only [uiState]. Every change goes through
+ * `copy()`, so a rotation keeps search text and filters because this object
+ * outlives the Activity.
+ *
+ * The feed itself is loaded by [GetFeedUseCase] and re-run on a 300 ms debounce
+ * whenever the query or the filters change; the repository adds the simulated
+ * network delay and can throw to produce the error state.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class FeedViewModel(
     private val repository: PostRepository,
+    private val getFeed: GetFeedUseCase = GetFeedUseCase(repository),
+    private val toggleFavorite: ToggleFavoriteUseCase = ToggleFavoriteUseCase(repository),
 ) : ViewModel() {
 
-    private val filters = MutableStateFlow(FeedFilters())
+    private val _uiState = MutableStateFlow(FeedUiState())
+    val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
 
-    val uiState: StateFlow<FeedUiState> =
+    /** Bumped by [onRetry]; included in the request key so it re-runs the load. */
+    private val retryTrigger = MutableStateFlow(0)
+
+    init {
+        Log.d(TAG, "init")
+        observeFeed()
+        observeActiveCount()
+    }
+
+    private fun observeFeed() {
         combine(
-            filters,
-            filters.flatMapLatest { f ->
-                repository.feed(f.status, f.species, f.district)
-            },
-            repository.activeCount(),
-        ) { f, posts, activeCount ->
-            FeedUiState(
-                filters = f,
-                posts = posts,
-                activeCount = activeCount,
-                isLoading = false,
-            )
-        }.stateIn(
-            scope = viewModelScope,
-            // Keeps the query alive while the user is on the feed (and for a short
-            // while after leaving), but drops it when the app goes background.
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = FeedUiState(),
+            _uiState.map { FeedRequest(it.query, it.filters) }.distinctUntilChanged(),
+            retryTrigger,
+        ) { request, retry -> request to retry }
+            .debounce(SEARCH_DEBOUNCE_MS)
+            .flatMapLatest { (request, _) -> loadFeed(request) }
+            .onEach(::render)
+            .launchIn(viewModelScope)
+    }
+
+    private fun loadFeed(request: FeedRequest): Flow<FeedResult> =
+        getFeed(
+            status = request.filters.status,
+            species = request.filters.species,
+            district = request.filters.district,
+            query = request.query,
         )
+            .map<List<Post>, FeedResult> { FeedResult.Content(it) }
+            .onStart { emit(FeedResult.Loading) }
+            .catch { emit(FeedResult.Error(it.message ?: "Unknown error")) }
 
-    fun selectStatus(status: PostStatus?) = update { copy(status = status) }
+    private fun render(result: FeedResult) {
+        _uiState.update { current ->
+            when (result) {
+                FeedResult.Loading ->
+                    current.copy(isLoading = true, errorMessage = null)
 
-    fun toggleSpecies(species: Species) = update {
+                is FeedResult.Content ->
+                    current.copy(posts = result.posts, isLoading = false, errorMessage = null)
+
+                is FeedResult.Error ->
+                    current.copy(isLoading = false, errorMessage = result.message)
+            }
+        }
+    }
+
+    private fun observeActiveCount() {
+        repository.activeCount()
+            .onEach { count -> _uiState.update { it.copy(activeCount = count) } }
+            .launchIn(viewModelScope)
+    }
+
+    // --- events (user actions) --------------------------------------------------
+
+    /** Search by text. Kept in the ViewModel, so it survives rotation. */
+    fun onQueryChange(value: String) = _uiState.update { it.copy(query = value) }
+
+    fun selectStatus(status: PostStatus?) = updateFilters { copy(status = status) }
+
+    fun toggleSpecies(species: Species) = updateFilters {
         // Tapping the active chip clears it — that is how the user gets back to
         // "all species" without an extra «Все» chip the mockup does not have.
         copy(species = if (species == this.species) null else species)
     }
 
-    fun selectDistrict(district: District?) = update { copy(district = district) }
+    fun selectDistrict(district: District?) = updateFilters { copy(district = district) }
 
-    fun clearFilters() = update { FeedFilters() }
+    fun clearFilters() = _uiState.update { it.copy(filters = FeedFilters(), query = "") }
 
-    fun toggleFavorite(post: Post) = viewModelScope.launch {
-        repository.toggleFavorite(post)
+    fun onFavouriteClick(post: Post) = viewModelScope.launch { toggleFavorite(post) }
+
+    /** Retry after an error: re-runs the same request. */
+    fun onRetry() {
+        retryTrigger.update { it + 1 }
     }
 
-    private inline fun update(block: FeedFilters.() -> FeedFilters) {
-        filters.value = filters.value.block()
+    private inline fun updateFilters(block: FeedFilters.() -> FeedFilters) =
+        _uiState.update { it.copy(filters = it.filters.block()) }
+
+    override fun onCleared() {
+        Log.d(TAG, "onCleared")
+        super.onCleared()
+    }
+
+    /** The part of the state the feed load depends on — used as the request key. */
+    private data class FeedRequest(val query: String, val filters: FeedFilters)
+
+    private sealed interface FeedResult {
+        data object Loading : FeedResult
+        data class Content(val posts: List<Post>) : FeedResult
+        data class Error(val message: String) : FeedResult
+    }
+
+    companion object {
+        private const val TAG = "FeedViewModel"
+        private const val SEARCH_DEBOUNCE_MS = 300L
     }
 }
