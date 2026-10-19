@@ -27,8 +27,6 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.IOException
-
-/** Swaps `Dispatchers.Main` for a test dispatcher (the ViewModel uses it). */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(
     val testDispatcher: kotlinx.coroutines.test.TestDispatcher = UnconfinedTestDispatcher(),
@@ -36,11 +34,6 @@ class MainDispatcherRule(
     override fun starting(description: Description) = Dispatchers.setMain(testDispatcher)
     override fun finished(description: Description) = Dispatchers.resetMain()
 }
-
-/**
- * A hand-written fake of the repository — possible only because the data layer is
- * an interface. It lets the ViewModel be tested on the JVM without Room or Android.
- */
 private class FakePostRepository(
     var posts: List<Post> = emptyList(),
     var fail: Boolean = false,

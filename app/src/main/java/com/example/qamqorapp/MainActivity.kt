@@ -73,7 +73,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private companion object {
-        /** Filter Logcat by `QamqorLifecycle` to see the rotation proof. */
         const val TAG = "QamqorLifecycle"
     }
 }

@@ -45,12 +45,6 @@ import com.example.qamqorapp.ui.components.StatusSegments
 import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
-
-/**
- * The route is the *only* place that knows the ViewModel exists. It owns the
- * `collectAsStateWithLifecycle()` subscription and turns every ViewModel method
- * into a plain lambda for [FeedScreen].
- */
 @Composable
 fun FeedRoute(
     onOpenPost: (Long) -> Unit,
@@ -74,18 +68,6 @@ fun FeedRoute(
         modifier = modifier,
     )
 }
-
-/**
- * «Главная лента» — a **stateless** screen: it receives [uiState] plus events and
- * draws them. It has no ViewModel, no filtering/sorting/searching logic, and can
- * therefore be previewed in every state (see the previews in `FeedPreviews.kt`).
- *
- * Structure top-to-bottom, matching the spec table:
- *   pine app bar (status-bar inset + 64 dp brand + 36 dp segments + search)
- *   filter chips row (44 dp)
- *   LazyColumn of cards — the *only* scrolling region; the header stays put
- *   56 dp FAB, 16 dp from the right and 16 dp above the bottom navigation
- */
 @Composable
 fun FeedScreen(
     uiState: FeedUiState,
@@ -201,8 +183,6 @@ fun FeedScreen(
                 }
             }
         }
-
-        // FAB: 56×56, 16dp from the right edge and 16dp above the bottom bar.
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)

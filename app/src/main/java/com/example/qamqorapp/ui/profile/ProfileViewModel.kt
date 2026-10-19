@@ -20,26 +20,15 @@ data class ProfileUiState(
     val favorites: Int = 0,
     val isLoading: Boolean = true,
 )
-
-/**
- * Profile screen: the identity row, the three counters of the stats strip, and
- * «Мои посты».
- *
- * All four numbers come from Room, so publishing, resolving or favoriting anywhere
- * in the app updates them without an explicit refresh.
- */
 class ProfileViewModel(
     private val repository: PostRepository,
     private val settings: com.example.qamqorapp.data.SettingsRepository,
 ) : ViewModel() {
 
-    /** Theme choice shown as selected in Settings (System / Light / Dark). */
     val themeMode: StateFlow<com.example.qamqorapp.data.ThemeMode> = settings.themeMode
 
-    /** In-app language tag ("en" / "ru"). */
     val language: StateFlow<String> = settings.language
 
-    /** Mirrors the repository's simulated-failure flag (see the debug settings row). */
     val simulateError: StateFlow<Boolean> = repository.shouldFail
 
     val uiState: StateFlow<ProfileUiState> =

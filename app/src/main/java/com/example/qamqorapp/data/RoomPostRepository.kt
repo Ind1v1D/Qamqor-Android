@@ -12,13 +12,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import java.io.IOException
-
-/**
- * Room-backed implementation of [PostRepository].
- *
- * It keeps the ViewModel layer free of Android/Room specifics and makes the whole
- * data layer unit-testable with a fake.
- */
 class RoomPostRepository(private val db: QamqorDatabase) : PostRepository {
 
     private val posts get() = db.postDao()
@@ -30,12 +23,6 @@ class RoomPostRepository(private val db: QamqorDatabase) : PostRepository {
     override fun setSimulateError(value: Boolean) {
         _shouldFail.value = value
     }
-
-    /**
-     * Makes every read look like a server round-trip: the value does not arrive
-     * until [NETWORK_DELAY_MS] later. `flowOn(IO)` keeps the wait off the main
-     * thread, exactly like a real network call would.
-     */
     private fun <T> Flow<T>.simulateNetwork(): Flow<T> = flow {
         delay(NETWORK_DELAY_MS)
         emitAll(this@simulateNetwork)
