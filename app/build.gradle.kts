@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.screenshot)
 }
 
 android {
@@ -38,6 +39,8 @@ android {
     buildFeatures {
         compose = true
     }
+    // Host-side Compose preview screenshot tests (see src/screenshotTest).
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
     // Local unit tests run against the Android SDK stubs, where every platform
     // method throws "not mocked". `returnDefaultValues` makes them no-op instead,
     // so a ViewModel that calls `Log.d` in `init` is still testable on the JVM.
@@ -82,4 +85,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.androidx.compose.ui.tooling)
 }

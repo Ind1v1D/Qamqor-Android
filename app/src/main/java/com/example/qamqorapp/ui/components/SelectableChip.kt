@@ -5,7 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,7 +32,7 @@ fun SelectableChip(
     val colors = LocalQamqorColors.current
     Box(
         modifier = modifier
-            .height(Dimens.CategoryChip.dp)
+            .defaultMinSize(minHeight = Dimens.CategoryChip.dp, minWidth = 48.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(if (selected) colors.pine else Color.Transparent)
             .border(
@@ -39,7 +40,8 @@ fun SelectableChip(
                 color = if (selected) colors.pine else colors.line,
                 shape = RoundedCornerShape(10.dp),
             )
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(

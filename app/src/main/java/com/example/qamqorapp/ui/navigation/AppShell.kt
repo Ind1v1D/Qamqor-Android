@@ -31,11 +31,6 @@ import com.example.qamqorapp.ui.setup.SetupRoute
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.ui.theme.SetStatusBarIconStyle
-
-/**
- * The app shell. It no longer touches the repository: the "has a profile?" flag is
- * data, so it comes from [AppShellViewModel] through `collectAsStateWithLifecycle`.
- */
 @Composable
 fun AppShell() {
     val viewModel = qamqorViewModel<AppShellViewModel>()

@@ -9,6 +9,7 @@ espressoCore = "3.7.0"
 appcompat = "1.8.0"
 material = "1.14.0"
 composeBom = "2026.09.00"
+screenshot = "0.0.1-alpha16"
 activityCompose = "1.13.0"
 lifecycle = "2.11.0"
 navigationCompose = "2.9.7"
@@ -41,9 +42,11 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }

@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** The three independent filters of the feed screen, before they hit SQL. */
+
 data class FeedFilters(
     val status: PostStatus? = null,   // null == the «Все» segment
     val species: Species? = null,     // the «Собаки» / «Кошки» chips
@@ -38,17 +38,6 @@ data class FeedFilters(
         get() = status != null || species != null || district != null
 }
 
-/**
- * The "order board" of the feed screen — one immutable snapshot of everything the
- * View draws. Only `val` properties: the View can never mutate it, it can only ask
- * the ViewModel for a new one.
- *
- * The four situations the assignment asks for are derived from three flags:
- *  - **loading** → [isLoading]
- *  - **error**   → [errorMessage] != null
- *  - **empty**   → [isEmpty] (a successful load that matched nothing)
- *  - **content** → [isContent]
- */
 data class FeedUiState(
     val query: String = "",
     val filters: FeedFilters = FeedFilters(),
@@ -65,18 +54,6 @@ data class FeedUiState(
     val isFiltered: Boolean get() = filters.isActive || query.isNotBlank()
 }
 
-/**
- * Feed screen state (the "chef").
- *
- * The single source of truth is the private [MutableStateFlow] `_uiState`; the
- * screen only ever sees the read-only [uiState]. Every change goes through
- * `copy()`, so a rotation keeps search text and filters because this object
- * outlives the Activity.
- *
- * The feed itself is loaded by [GetFeedUseCase] and re-run on a 300 ms debounce
- * whenever the query or the filters change; the repository adds the simulated
- * network delay and can throw to produce the error state.
- */
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class FeedViewModel(
     private val repository: PostRepository,
@@ -86,8 +63,6 @@ class FeedViewModel(
 
     private val _uiState = MutableStateFlow(FeedUiState())
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
-
-    /** Bumped by [onRetry]; included in the request key so it re-runs the load. */
     private val retryTrigger = MutableStateFlow(0)
 
     init {
@@ -141,7 +116,7 @@ class FeedViewModel(
 
     // --- events (user actions) --------------------------------------------------
 
-    /** Search by text. Kept in the ViewModel, so it survives rotation. */
+    /** Search by text.*/
     fun onQueryChange(value: String) = _uiState.update { it.copy(query = value) }
 
     fun selectStatus(status: PostStatus?) = updateFilters { copy(status = status) }
@@ -158,7 +133,7 @@ class FeedViewModel(
 
     fun onFavouriteClick(post: Post) = viewModelScope.launch { toggleFavorite(post) }
 
-    /** Retry after an error: re-runs the same request. */
+    /** Retry after an error */
     fun onRetry() {
         retryTrigger.update { it + 1 }
     }
@@ -171,7 +146,6 @@ class FeedViewModel(
         super.onCleared()
     }
 
-    /** The part of the state the feed load depends on — used as the request key. */
     private data class FeedRequest(val query: String, val filters: FeedFilters)
 
     private sealed interface FeedResult {

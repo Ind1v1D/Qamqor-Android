@@ -8,16 +8,6 @@ import com.example.qamqorapp.data.Post
 import com.example.qamqorapp.data.PostStatus
 import com.example.qamqorapp.data.Species
 import com.example.qamqorapp.ui.theme.QamqorTheme
-
-/**
- * The four previews the assignment asks for — loading, content, empty and error —
- * built from **fake** [FeedUiState] objects. Because [FeedScreen] is stateless,
- * these render without a device, without Room and without a ViewModel.
- *
- * Open this file in Android Studio's preview pane: if you can see the error state
- * here, the screen is genuinely decoupled from the ViewModel.
- */
-
 private val previewPosts = listOf(
     Post(
         id = 1,
