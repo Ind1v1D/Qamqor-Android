@@ -21,28 +21,24 @@ val Inter = FontFamily(
 )
 
 val QamqorTypography = Typography(
-    // <h1> of the concept — big serif statement.
     displaySmall = TextStyle(
         fontFamily = ZillaSlab,
         fontWeight = FontWeight.SemiBold,
         fontSize = 30.sp,
         lineHeight = 36.sp,
     ),
-    // Brand wordmark (20sp Zilla Slab) and the pet name on the detail screen.
     titleLarge = TextStyle(
         fontFamily = ZillaSlab,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 26.sp,
     ),
-    // Screen / section headings (16sp Zilla Slab).
     titleMedium = TextStyle(
         fontFamily = ZillaSlab,
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
         lineHeight = 22.sp,
     ),
-    // Card titles (14sp Inter 600).
     titleSmall = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.SemiBold,
@@ -55,35 +51,30 @@ val QamqorTypography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
     ),
-    // Descriptions and body copy (14sp).
     bodyMedium = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 21.sp,
     ),
-    // Metadata under cards, helper text (12sp).
     bodySmall = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 16.sp,
     ),
-    // Buttons (14sp 700).
     labelLarge = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
         lineHeight = 18.sp,
     ),
-    // Segments, chips, app-bar subtitle (12sp 600).
     labelMedium = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.SemiBold,
         fontSize = 12.sp,
         lineHeight = 16.sp,
     ),
-    // Status tags, tab labels, stat captions (10–11sp, uppercase in usage).
     labelSmall = TextStyle(
         fontFamily = Inter,
         fontWeight = FontWeight.Bold,

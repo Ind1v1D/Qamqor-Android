@@ -19,30 +19,16 @@ import kotlinx.coroutines.launch
 
 data class DetailUiState(
     val post: Post? = null,
-    /** Author name as it should be displayed (current profile if it is our post). */
     val author: String = "",
-    /** True before the first emission, so the screen can show progress. */
     val isLoading: Boolean = true,
-    /** True when the id no longer resolves to a row (deleted in another tab). */
     val missing: Boolean = false,
 )
 
-/**
- * Detail screen.
- *
- * The id arrives through [SavedStateHandle] (the `detail/{postId}` navigation
- * argument), not as a call parameter — which means it also survives process death,
- * not only rotation. [flatMapLatest] re-subscribes when it changes and emits `null`
- * after a deletion, which the screen renders as «Это объявление больше недоступно»
- * instead of crashing.
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModel(
     private val repository: PostRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-
-    /** Read straight from the nav argument; `-1` when the screen was opened wrong. */
     private val postId = MutableStateFlow(savedStateHandle.get<Long>(ARG_POST_ID) ?: NO_ID)
     private val authorCache = MutableStateFlow<String?>(null)
 
@@ -65,9 +51,6 @@ class DetailViewModel(
                 post == null -> DetailUiState(isLoading = false, missing = true)
                 else -> DetailUiState(
                     post = post,
-                    // Our own posts show the *current* profile name, so renaming
-                    // the profile updates every old announcement too — abbreviated
-                    // to «Имя Ф.» the way the concept's "Опубликовал" cell is.
                     author = if (post.isMine) {
                         shortName(cachedAuthor ?: post.author)
                     } else {

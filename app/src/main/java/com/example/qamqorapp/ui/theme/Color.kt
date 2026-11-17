@@ -3,40 +3,33 @@ package com.example.qamqorapp.ui.theme
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-/*
- * The Qamqor palette.
- */
-
-// ---- Light ("pergament") ------------------------------------------------------
-val PineLight = Color(0xFFAE4E2A)        // --pine   : app bars, primary actions
-val Pine2Light = Color(0xFF8B3D22)       // --pine-2 : pressed / gradient end
-val AmberLight = Color(0xFFD99A3B)       // --amber  : the single bright accent
-val BgLight = Color(0xFFF7EFDF)          // --bg     : parchment background
-val PanelLight = Color(0xFFFFFCF5)       // --panel  : cards, sheets, bars
-val InkLight = Color(0xFF2C2117)         // --ink
-val InkSoftLight = Color(0xFF8C7A65)     // --ink-soft
-val LineLight = Color(0xFFE7D7BC)        // --line   : hairlines, outlines
-val AmberSoftLight = Color(0xFFF4E1BA)   // --amber-soft
-val BlueLight = Color(0xFFB0692F)        // --blue   : "found" accent
-val BlueSoftLight = Color(0xFFF1E3CE)    // --blue-soft
-val DangerSoftLight = Color(0xFFEED2BF)  // --danger-soft : "lost" accent
+val PineLight = Color(0xFFAE4E2A)
+val Pine2Light = Color(0xFF8B3D22)
+val AmberLight = Color(0xFFD99A3B)
+val BgLight = Color(0xFFF7EFDF)
+val PanelLight = Color(0xFFFFFCF5)
+val InkLight = Color(0xFF2C2117)
+val InkSoftLight = Color(0xFF8C7A65)
+val LineLight = Color(0xFFE7D7BC)
+val AmberSoftLight = Color(0xFFF4E1BA)
+val BlueLight = Color(0xFFB0692F)
+val BlueSoftLight = Color(0xFFF1E3CE)
+val DangerSoftLight = Color(0xFFEED2BF)
 
 val TextPrimaryLight = InkLight
 
-// Tag text colours picked to stay readable on the soft backgrounds above.
 val LostInkLight = Color(0xFF8A3B2A)
 val FoundInkLight = Color(0xFFB0692F)
 val AdoptInkLight = Color(0xFF8A5A17)
 
-// ---- Dark ---------------------------------------------------------------------
 val PineDark = Color(0xFFAE4E2A)
 val Pine2Dark = Color(0xFF7A351D)
 val AmberDark = Color(0xFFD99A3B)
-val BgDark = Color(0xFF1C140D)           // --bg   in the dark media query
-val PanelDark = Color(0xFF251B12)        // --panel
-val InkDark = Color(0xFFF3E9DA)          // --ink
-val InkSoftDark = Color(0xFFBBA487)      // --ink-soft
-val LineDark = Color(0xFF3E2E1E)         // --line
+val BgDark = Color(0xFF1C140D)
+val PanelDark = Color(0xFF251B12)
+val InkDark = Color(0xFFF3E9DA)
+val InkSoftDark = Color(0xFFBBA487)
+val LineDark = Color(0xFF3E2E1E)
 val AmberSoftDark = Color(0xFF3E2C15)
 val BlueSoftDark = Color(0xFF33261A)
 val DangerSoftDark = Color(0xFF3E2818)

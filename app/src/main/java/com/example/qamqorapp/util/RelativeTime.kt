@@ -5,20 +5,7 @@ import com.example.qamqorapp.R
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
-/**
- * Turns an epoch-millis timestamp into the phrases the mockups use:
- * «вчера», «2 дня назад», «сегодня».
- *
- * Kept out of the composables so the same logic can be unit-tested and reused by
- * both the feed card («Алмалинский р-н · вчера») and the detail header
- * («видели вчера, 18:40»).
- *
- * Order matters: the *calendar* checks (today / yesterday) win over the raw
- * elapsed-time checks, otherwise a post made at 23:00 would read "20 hours ago"
- * at 21:00 the next day instead of «вчера».
- */
 object RelativeTime {
-
     fun format(context: Context, timestamp: Long, now: Long = System.currentTimeMillis()): String {
         if (timestamp <= 0) return ""
 
@@ -26,8 +13,6 @@ object RelativeTime {
         if (elapsed < TimeUnit.MINUTES.toMillis(5)) {
             return context.getString(R.string.time_just_now)
         }
-        // Sub-hour posts keep their exact age even across midnight: "30 min ago"
-        // reads better than "yesterday" at 00:15.
         if (elapsed < TimeUnit.MINUTES.toMillis(60)) {
             return context.getString(
                 R.string.time_minutes,
@@ -66,10 +51,6 @@ object RelativeTime {
         }
     }
 
-    /**
-     * «вчера, 18:40» — a relative day plus the wall-clock time, matching the detail
-     * screen's `detail_seen` pattern.
-     */
     fun formatWithClock(
         context: Context,
         timestamp: Long,

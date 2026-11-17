@@ -25,7 +25,6 @@ import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
-/** Route: the only composable here that knows the ViewModel. */
 @Composable
 fun FavoritesRoute(
     onOpenPost: (Long) -> Unit,
@@ -42,14 +41,6 @@ fun FavoritesRoute(
     )
 }
 
-/**
- * «Избранное» — stateless.
- *
- * Spec: 64 dp app bar with a counter instead of segments/chips, the *same*
- * PostCard component as the feed, and a centred empty state when the Room query
- * for `isFavorite = 1` comes back with zero rows — which is exactly the case the
- * design concept calls out.
- */
 @Composable
 fun FavoritesScreen(
     uiState: FavoritesUiState,
@@ -89,8 +80,6 @@ fun FavoritesScreen(
                         PostCard(
                             post = post,
                             onClick = { onOpenPost(post.id) },
-                            // Tapping the star here *un*-saves it, which is the
-                            // natural gesture on a "saved" list.
                             onToggleFavorite = { onRemove(post) },
                         )
                     }

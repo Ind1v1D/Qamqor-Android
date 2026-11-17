@@ -15,11 +15,6 @@ import com.example.qamqorapp.ui.profile.SettingsSection
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.ui.theme.QamqorTheme
 
-/**
- * Host-side screenshot tests for Profile → «Настройки» — the theme/language chip
- * block we restyled. Rendered EN/RU in light/dark; a regression in chip padding or
- * row wrapping shows up as a diff in the HTML report.
- */
 @PreviewTest
 @Preview(name = "Settings EN light", showBackground = true, widthDp = 360, heightDp = 420)
 @Composable

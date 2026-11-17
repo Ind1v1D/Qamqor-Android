@@ -57,10 +57,6 @@ import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.util.RelativeTime
-/**
- * The route: the only composable here that knows the ViewModel. The post id is no
- * longer passed in — the ViewModel reads it from `SavedStateHandle`.
- */
 @Composable
 fun DetailRoute(
     onBack: () -> Unit,
@@ -77,7 +73,6 @@ fun DetailRoute(
     )
 }
 
-/** Stateless detail screen: draws a [DetailUiState], knows nothing about a ViewModel. */
 @Composable
 fun DetailScreen(
     uiState: DetailUiState,
@@ -139,7 +134,6 @@ private fun DetailContent(
                     .height(Dimens.PhotoHeader.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                // Placeholder for the real photo — the concept's emoji.
                 Text(
                     text = post.emoji.ifBlank { "🐾" },
                     style = MaterialTheme.typography.displaySmall.copy(fontSize = 52.sp),
@@ -154,7 +148,6 @@ private fun DetailContent(
             }
         }
 
-        // ---- scrollable body --------------------------------------------------
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -178,7 +171,6 @@ private fun DetailContent(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 2 × 2 info grid, 64 dp cells, 8 dp gaps, 10 dp radius.
             Row(
                 horizontalArrangement = Arrangement.spacedBy(Dimens.InfoGridGap.dp),
                 modifier = Modifier.fillMaxWidth(),
@@ -216,7 +208,6 @@ private fun DetailContent(
                 ResolvedTag()
             }
 
-            // `.detail-body .desc` — a plain paragraph, no heading, in ink-soft.
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = post.description.ifBlank {
@@ -228,7 +219,6 @@ private fun DetailContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // ---- fixed action row, 52 dp, above the navigation bar ---------------
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -278,8 +268,6 @@ private fun DetailContent(
                     )
                 },
                 primary = true,
-                // ACTION_DIAL puts the number in the dialer but never places the
-                // call — the safe default for a "call" button in a listing app.
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${post.phone}"))
                     runCatching { context.startActivity(intent) }
@@ -290,7 +278,6 @@ private fun DetailContent(
     }
 }
 
-/** «Алмалинский р-н, ул. Сатпаева · видели вчера, 18:40» */
 @Composable
 private fun seenLine(post: Post): String {
     val context = LocalContext.current
@@ -301,7 +288,6 @@ private fun seenLine(post: Post): String {
     return "$location · " + context.getString(R.string.detail_seen, seen)
 }
 
-/** One cell of the 2×2 grid. */
 @Composable
 private fun InfoCell(
     label: String,
@@ -334,7 +320,6 @@ private fun InfoCell(
     }
 }
 
-/** 52 dp pill: ghost when secondary, pine-filled when primary. */
 @Composable
 private fun ActionButton(
     label: String,
@@ -351,7 +336,6 @@ private fun ActionButton(
             .height(Dimens.ActionButton.dp)
             .clip(shape)
             .background(if (primary) colors.pine else colors.panel)
-            // A hairline border only on the ghost variant; the filled one needs none.
             .border(
                 width = if (primary) 0.dp else 1.dp,
                 color = if (primary) Color.Transparent else colors.line,

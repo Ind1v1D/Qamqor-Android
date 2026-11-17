@@ -23,6 +23,7 @@ import androidx.navigation.navArgument
 import com.example.qamqorapp.ui.components.CenteredMessage
 import com.example.qamqorapp.ui.create.CreateRoute
 import com.example.qamqorapp.ui.detail.DetailRoute
+import com.example.qamqorapp.ui.facts.PetFactsRoute
 import com.example.qamqorapp.ui.favorites.FavoritesRoute
 import com.example.qamqorapp.ui.feed.FeedRoute
 import com.example.qamqorapp.ui.profile.ProfileRoute
@@ -58,15 +59,12 @@ private fun AppNavHost(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val bottomBarVisible = shouldShowBottomBar(currentRoute)
-
-    // The bar is part of the shell, so its total height (56dp + gesture inset) is
-    // known here — the NavHost is padded by exactly that much to sit above it.
     val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeight = Dimens.BottomBar.dp + bottomInset
 
-    // Pine-headed screens need light system icons; the parchment/panel ones need dark.
     val darkHeader = currentRoute == Routes.FEED ||
         currentRoute == Routes.FAVORITES ||
+        currentRoute == Routes.FACTS ||
         currentRoute == Routes.CREATE ||
         currentRoute?.startsWith("detail/") == true
     SetStatusBarIconStyle(light = darkHeader)
@@ -102,11 +100,14 @@ private fun AppNavHost(
                 )
             }
 
+            composable(Routes.FACTS) {
+                PetFactsRoute()
+            }
+
             composable(Routes.PROFILE) {
                 ProfileRoute(
                     onOpenPost = { navController.navigate(Routes.detail(it)) },
                     onSignOut = {
-                        // Drop the identity row, then walk back to setup.
                         onSignOut()
                         navController.navigate(Routes.SETUP) {
                             popUpTo(0) { inclusive = true }
@@ -137,8 +138,6 @@ private fun AppNavHost(
                 currentRoute = currentRoute,
                 onNavigate = { route ->
                     when (route) {
-                        // Re-tapping the active tab pops back to its root, which is
-                        // the platform convention and keeps the stack shallow.
                         currentRoute -> navController.popBackStack(route, inclusive = false)
                         else -> navController.navigate(route) {
                             popUpTo(navController.graph.findStartDestination().id) {

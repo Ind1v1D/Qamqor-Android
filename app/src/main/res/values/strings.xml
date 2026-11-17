@@ -16,16 +16,27 @@
     <!-- Tabs -->
     <string name="tab_feed">Feed</string>
     <string name="tab_favorites">Favorites</string>
+    <string name="tab_facts">Facts</string>
     <string name="tab_profile">Profile</string>
 
-    <!-- First-run profile setup -->
+    <!-- Pet facts loaded from the API -->
+    <string name="facts_title">Pet facts</string>
+    <string name="facts_subtitle">Cats and dogs</string>
+
+    <!-- First-run login -->
     <string name="setup_title">Welcome to Qamqor</string>
-    <string name="setup_subtitle">The caring place for lost and found pets in Almaty. Tell us who you are so people can reach you.</string>
+    <string name="setup_subtitle">Sign in to post, save and respond to lost and found pets in Almaty.</string>
     <string name="setup_name">Your name</string>
     <string name="setup_name_hint">Aigerim K.</string>
     <string name="setup_phone">Phone number</string>
     <string name="setup_phone_hint">+7 707 000 00 00</string>
-    <string name="setup_submit">Get started</string>
+    <string name="setup_submit">Sign in</string>
+    <string name="login_username">Username</string>
+    <string name="login_username_hint">emilys</string>
+    <string name="login_password">Password</string>
+    <string name="login_password_hint">Your password</string>
+    <string name="login_demo_hint">Demo account: emilys / emilyspass — tap to fill</string>
+    <string name="login_error">Could not sign in. Check your username, password and connection.</string>
 
     <!-- Feed -->
     <string name="feed_city">Almaty</string>
@@ -195,4 +206,18 @@
     <string name="settings_debug">Demo: simulate error</string>
     <string name="debug_on">On</string>
     <string name="debug_off">Off</string>
+
+    <!-- Profile photo -->
+    <string name="photo_take">Take photo</string>
+    <string name="photo_change">Change photo</string>
+    <string name="photo_remove">Remove photo</string>
+    <string name="photo_avatar_description">Profile photo. Tap to take a new one</string>
+    <string name="photo_rationale_title">Camera access</string>
+    <string name="photo_rationale_body">The camera is used only to take your profile photo. The photo is stored on this device.</string>
+    <string name="photo_allow">Allow</string>
+    <string name="photo_denied_title">Camera is blocked</string>
+    <string name="photo_denied_body">Camera access was denied. You can enable it in the app settings.</string>
+    <string name="photo_open_settings">Open settings</string>
+    <string name="photo_no_camera">No camera app found on this device</string>
+    <string name="photo_cancel">Cancel</string>
 </resources>

@@ -45,6 +45,12 @@ class SettingsRepository(context: Context) {
         }
     }
 
+    fun askedCameraBefore(): Boolean = prefs.getBoolean("asked_camera", false)
+
+    fun setAskedCameraBefore(value: Boolean) {
+        prefs.edit { putBoolean("asked_camera", value) }
+    }
+
     fun setLanguage(tag: String) {
         val normalized = if (tag.equals("ru", ignoreCase = true)) "ru" else "en"
         _language.value = normalized

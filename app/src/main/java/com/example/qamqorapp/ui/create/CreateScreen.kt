@@ -51,10 +51,6 @@ import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.components.SelectableChip
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
-/**
- * Route: owns the ViewModel and wires publish/consume side effects. Everything
- * else is the stateless [CreateScreen] below.
- */
 @Composable
 fun CreateRoute(
     onBack: () -> Unit,
@@ -64,10 +60,8 @@ fun CreateRoute(
     val viewModel = qamqorViewModel<CreateViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Prefill the contact phone from the profile the first time we compose.
     LaunchedEffect(Unit) { viewModel.prefillFromProfile() }
 
-    // The row is in Room: hand control back to the shell, which pops this screen.
     LaunchedEffect(state.published) {
         if (state.published) {
             viewModel.consumePublished()
@@ -89,17 +83,6 @@ fun CreateRoute(
     )
 }
 
-/**
- * «Новое объявление» — stateless.
- *
- * The concept's dashed «Добавить фото» box is replaced by an emoji picker — the
- * scope of this build has no photo pipeline — and the district field is a real
- * dropdown over the [District] enum rather than free text, which is exactly what
- * makes the feed's district chips possible.
- *
- * Chrome: 56 dp app bar with a back arrow, scrollable form, and the 48 dp amber
- * «Опубликовать» button pinned to the bottom (above the nav bar and the keyboard).
- */
 @Composable
 fun CreateScreen(
     uiState: CreateUiState,
@@ -117,7 +100,6 @@ fun CreateScreen(
 
     Box(modifier = modifier.fillMaxSize().background(colors.panel)) {
         Column(modifier = Modifier.fillMaxSize()) {
-
             QamqorTopBar(
                 title = stringResource(R.string.create_title),
                 navigationIcon = {
@@ -134,12 +116,9 @@ fun CreateScreen(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .imePadding()
-                    // `.form{padding:16px}` — 16 all round, 12px between rows.
                     .padding(Dimens.ContentPadding.dp),
                 verticalArrangement = Arrangement.spacedBy(Dimens.FieldGap.dp),
             ) {
-                // ---- category: 3 chips, 40 dp, equal width -------------------
-                // No caption in the concept: `.catrow` sits at the top of `.form`.
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth(),
@@ -164,13 +143,11 @@ fun CreateScreen(
                     )
                 }
 
-                // ---- illustration: the concept's photo box, as an emoji picker -
                 EmojiPicker(
                     selected = uiState.emoji,
                     onSelect = onEmojiSelect,
                 )
 
-                // ---- fields -------------------------------------------------
                 LabeledField(
                     label = stringResource(R.string.create_name),
                     value = uiState.name,
@@ -208,7 +185,6 @@ fun CreateScreen(
             }
         }
 
-        // ---- pinned «Опубликовать», 48 dp ----------------------------------
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -239,10 +215,6 @@ fun CreateScreen(
     }
 }
 
-/** 40 dp category chip; the selected one flips to pine, exactly like the mockup. */
-
-
-/** The 96 dp dashed box of the concept, holding the emoji choices. */
 @Composable
 private fun EmojiPicker(
     selected: String,
@@ -256,8 +228,6 @@ private fun EmojiPicker(
             .fillMaxWidth()
             .height(Dimens.PhotoBox.dp)
             .clip(RoundedCornerShape(14.dp))
-            // `border:1.5px dashed var(--line)` — no fill in the concept, so the
-            // panel of the form shows straight through the dashes.
             .dashedBorder(
                 color = colors.line,
                 width = 1.5.dp,
@@ -279,8 +249,6 @@ private fun EmojiPicker(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        // Same surface treatment as every other input: parchment
-                        // with a hairline, amber-soft when chosen.
                         .background(if (isSelected) colors.amberSoft else colors.bg)
                         .border(
                             width = 1.dp,
@@ -297,7 +265,6 @@ private fun EmojiPicker(
     }
 }
 
-/** 44 dp input with an 11sp label above it and inline validation. */
 @Composable
 private fun LabeledField(
     label: String,
@@ -324,7 +291,6 @@ private fun LabeledField(
     )
 }
 
-/** District dropdown: 44 dp field that opens a Material3 menu of the enum. */
 @Composable
 private fun DistrictField(
     selected: District?,
@@ -334,9 +300,6 @@ private fun DistrictField(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    // The menu has to live inside the same Box as the field so it can anchor to
-    // the field's bounds; QamqorField is what actually draws the box, and it
-    // hands every tap on that box to `onBoxClick` instead of trying to focus.
     Box(modifier = modifier.fillMaxWidth()) {
         QamqorField(
             value = selected?.let { stringResource(it.labelRes) }.orEmpty(),
@@ -377,4 +340,3 @@ private fun DistrictField(
         }
     }
 }
-

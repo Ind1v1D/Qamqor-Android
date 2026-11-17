@@ -112,6 +112,18 @@ which is why it is absent here.
 a hand-written fake `PostRepository` (loading→content, the error state, retry,
 search and the empty state) — no emulator needed.
 
+## SIS 5 — Pet facts from the API
+
+In the English mode the «Факты» / «Facts» tab loads five cat facts from
+`https://catfact.ninja` and five dog facts from `https://dogapi.dog` with Retrofit.
+In the Russian mode the same screen shows a prewritten Russian list from
+`LocalPetFacts` (five cat and five dog facts), so no translation API is needed.
+Both sources are mapped into one `PetFact` model and shown through three explicit
+states: `Loading`, `Success`, `Error`. The error state has a Retry button, so
+turning the network off is safe in the English mode.
+
+How it works, file by file: [`SIS5_CHEATSHEET.md`](SIS5_CHEATSHEET.md).
+
 ## Where the data is stored
 
 - **Room** database `qamqor.db` (tables `posts`, `profile`) — on device only, at

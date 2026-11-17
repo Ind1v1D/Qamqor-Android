@@ -29,13 +29,6 @@ import com.example.qamqorapp.R
 import com.example.qamqorapp.ui.components.QamqorField
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
-/**
- * The two dialogs the design implies but does not draw: editing the local profile
- * and confirming a destructive action («Выйти», «Удалить»).
- *
- * They share the app's surfaces and type so they read as part of the same system
- * rather than as stock Material dialogs dropped on top.
- */
 @Composable
 fun ConfirmDialog(
     title: String,
@@ -111,10 +104,6 @@ private fun DialogButton(
     }
 }
 
-/**
- * Name + phone editor for the local profile (there is no backend, so "editing the
- * account" is just rewriting the single `profile` row).
- */
 @Composable
 fun EditProfileDialog(
     initialName: String,
@@ -198,7 +187,6 @@ private fun DialogField(
         label = label,
         placeholder = placeholder,
         keyboardType = keyboardType,
-        // The dialog sits on `panel`, so the input has to be the parchment tone.
         containerColor = colors.bg,
     )
 }

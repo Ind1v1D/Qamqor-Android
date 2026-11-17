@@ -13,16 +13,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * `border-style: dashed` — which the Compose
- * [androidx.compose.foundation.border] modifier simply does not have. The concept
- * draws the "add photo" placeholder with `border: 1.5px dashed var(--line)` and a
- * `dash(6 5)` pattern, so the stroke is laid out here with
- * [PathEffect.dashPathEffect] instead.
- *
- * @param radius corner radius of the rectangle. The photo box in the spec is square
- *   (0dp); the rounded variant is kept so the helper can be reused elsewhere.
- */
 @Stable
 fun Modifier.dashedBorder(
     color: Color,
@@ -36,8 +26,6 @@ fun Modifier.dashedBorder(
         floatArrayOf(dashLength.toPx(), gapLength.toPx()),
         phase = 0f,
     )
-    // Centre the stroke on the outline, then nudge it inwards by half its own
-    // width so the dashes sit exactly on the edge instead of half outside it.
     val inset = strokeWidth / 2f
 
     drawRoundRect(

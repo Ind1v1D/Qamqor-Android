@@ -2,28 +2,26 @@ package com.example.qamqorapp.ui.navigation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qamqorapp.data.AuthClient
 import com.example.qamqorapp.data.PostRepository
 import com.example.qamqorapp.data.SettingsRepository
 import com.example.qamqorapp.data.ThemeMode
+import com.example.qamqorapp.data.local.ProfilePhotoStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-/**
- * State for the app shell.
- *
- * It exists so the shell composable does not read the repository directly: the
- * "is there a profile?" question is data, so it belongs here (a ViewModel), not in
- * a composable. `null` = still reading, `false` = no profile → setup, `true` → feed.
- */
 class AppShellViewModel(
     private val repository: PostRepository,
+    private val auth: AuthClient,
     settings: SettingsRepository,
+    private val photoStore: ProfilePhotoStore,
 ) : ViewModel() {
-
     val themeMode: StateFlow<ThemeMode> = settings.themeMode
         .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.SYSTEM)
 
@@ -35,13 +33,13 @@ class AppShellViewModel(
 
     init {
         viewModelScope.launch {
-            _hasProfile.value = repository.currentProfile() != null
+            _hasProfile.value = auth.isLoggedIn || repository.currentProfile() != null
         }
     }
 
-    /** Sign-out: clears the local identity row; the shell then walks back to setup. */
     fun signOut() = viewModelScope.launch {
-        repository.clearProfile()
+        auth.logout()
+        withContext(Dispatchers.IO) { photoStore.delete() }
         _hasProfile.value = false
     }
 }

@@ -7,11 +7,6 @@ import com.example.qamqorapp.R
 import com.example.qamqorapp.data.Post
 import com.example.qamqorapp.data.PostStatus
 
-/**
- * Single place where a status becomes user-visible text and colour, so the segment
- * labels, the tag on the card, the info cell on the detail screen and the tab
- * filter can never drift apart.
- */
 @Composable
 fun statusLabel(status: PostStatus): String = stringResource(
     when (status) {
@@ -21,7 +16,6 @@ fun statusLabel(status: PostStatus): String = stringResource(
     }
 )
 
-/** Same mapping, without a Composable — for code that only needs the resource id. */
 @StringRes
 fun statusStringRes(status: PostStatus): Int = when (status) {
     PostStatus.LOST -> R.string.status_lost

@@ -33,8 +33,6 @@ interface PostDao {
     @Query("SELECT * FROM posts WHERE isMine = 1 ORDER BY createdAt DESC")
     fun observeMine(): Flow<List<Post>>
 
-    // --- counts used by the app-bar subtitle and the profile stats row -----------
-
     @Query("SELECT COUNT(*) FROM posts WHERE isResolved = 0")
     fun observeActiveCount(): Flow<Int>
 
@@ -46,8 +44,6 @@ interface PostDao {
 
     @Query("SELECT COUNT(*) FROM posts WHERE isMine = 1 AND isResolved = 1")
     fun observeMineResolvedCount(): Flow<Int>
-
-    // --- writes -----------------------------------------------------------------
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: Post): Long

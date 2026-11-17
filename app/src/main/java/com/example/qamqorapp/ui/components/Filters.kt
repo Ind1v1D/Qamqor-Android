@@ -34,14 +34,6 @@ import com.example.qamqorapp.data.Species
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
-/**
- * The four-way status segment row inside the pine app bar
- * («Все / Потеряно / Найдено / Пристройство»).
- *
- * Rendering it as a plain Row of equal-width boxes rather than Material3's
- * SegmentedButton keeps the mockup's exact look: 36 dp tall, 8 dp radius, the
- * active segment flipping to white-on-pine.
- */
 @Composable
 fun StatusSegments(
     selected: PostStatus?,
@@ -50,7 +42,6 @@ fun StatusSegments(
 ) {
     val c = LocalQamqorColors.current
 
-    // The «Все» segment maps to null == "no status filter".
     val entries: List<Pair<String, PostStatus?>> = listOf(
         stringResource(R.string.seg_all) to null,
         stringResource(R.string.seg_lost) to PostStatus.LOST,
@@ -87,7 +78,6 @@ fun StatusSegments(
     }
 }
 
-/** A single filter chip; `selected` tints it with the amber-soft token. */
 @Composable
 fun FilterChip(
     label: String,
@@ -121,13 +111,6 @@ fun FilterChip(
     }
 }
 
-/**
- * The species + district filter row under the app bar (44 dp, horizontally
- * scrollable, as the spec table requires).
- *
- * No «all districts» chip: the concept shows only the real districts, all of them
- * unselected at rest, and tapping the active district again is what clears it.
- */
 @Composable
 fun FeedFilterRow(
     species: Species?,
@@ -143,8 +126,6 @@ fun FeedFilterRow(
             .fillMaxWidth()
             .height(Dimens.FilterRow.dp)
             .background(c.panel)
-            // `.filters{border-bottom:1px solid var(--line)}` separates the chip
-            // strip from the feed below it.
             .drawBehind {
                 drawLine(
                     color = c.line,

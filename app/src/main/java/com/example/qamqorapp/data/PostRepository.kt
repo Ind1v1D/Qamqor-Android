@@ -4,8 +4,6 @@ import android.content.Context
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 interface PostRepository {
-
-    // --- feed / lists -----------------------------------------------------------
     fun feed(
         status: PostStatus?,
         species: Species?,
@@ -24,15 +22,11 @@ interface PostRepository {
     fun mineCount(): Flow<Int>
     fun mineResolvedCount(): Flow<Int>
 
-    // --- profile ----------------------------------------------------------------
-
     fun profile(): Flow<Profile?>
 
     suspend fun saveProfile(name: String, phone: String)
 
     suspend fun clearProfile()
-
-    // --- post actions ------------------------------------------------------------
 
     suspend fun toggleFavorite(post: Post)
 

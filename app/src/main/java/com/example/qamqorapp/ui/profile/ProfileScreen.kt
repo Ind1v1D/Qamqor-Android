@@ -1,5 +1,18 @@
 package com.example.qamqorapp.ui.profile
 
+import android.Manifest
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,24 +37,31 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.R
 import com.example.qamqorapp.data.Post
@@ -56,8 +76,8 @@ import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.util.RelativeTime
+import kotlinx.coroutines.launch
 
-/** Route: the only composable that knows [ProfileViewModel]. */
 @Composable
 fun ProfileRoute(
     onSignOut: () -> Unit,
@@ -69,8 +89,56 @@ fun ProfileRoute(
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val language by viewModel.language.collectAsStateWithLifecycle()
     val simulateError by viewModel.simulateError.collectAsStateWithLifecycle()
-    // Only the route sees the Android context; the screen stays framework-free.
     val context = LocalContext.current
+
+    var showRationale by rememberSaveable { mutableStateOf(false) }
+    var showPermanentlyDenied by rememberSaveable { mutableStateOf(false) }
+    var rationaleBefore by rememberSaveable { mutableStateOf(false) }
+    var askedBefore by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        viewModel.onPhotoCaptured(success)
+    }
+    val launchCamera: () -> Unit = {
+        scope.launch {
+            try {
+                takePicture.launch(viewModel.newCaptureUri(context))
+            } catch (_: ActivityNotFoundException) {
+                Toast.makeText(context, R.string.photo_no_camera, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    val requestPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            launchCamera()
+        } else {
+            val rationaleAfter = context.findActivity()?.let { shouldShowCameraRationale(it) } == true
+            if (!rationaleAfter && (rationaleBefore || askedBefore)) {
+                showPermanentlyDenied = true
+            }
+        }
+    }
+    val askForPermission = {
+        rationaleBefore = context.findActivity()?.let { shouldShowCameraRationale(it) } == true
+        askedBefore = viewModel.askedCameraBefore()
+        viewModel.markCameraAsked()
+        requestPermission.launch(Manifest.permission.CAMERA)
+    }
+    val onTakePhoto = {
+        if (!context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            Toast.makeText(context, R.string.photo_no_camera, Toast.LENGTH_LONG).show()
+        } else {
+            val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED
+            val activity = context.findActivity()
+            when {
+                granted -> launchCamera()
+                activity != null && shouldShowCameraRationale(activity) -> showRationale = true
+                else -> askForPermission()
+            }
+        }
+    }
 
     ProfileScreen(
         uiState = state,
@@ -79,6 +147,8 @@ fun ProfileRoute(
         simulateError = simulateError,
         onOpenPost = onOpenPost,
         onSignOut = onSignOut,
+        onTakePhoto = onTakePhoto,
+        onRemovePhoto = viewModel::removePhoto,
         onSaveProfile = viewModel::saveProfile,
         onToggleResolved = viewModel::toggleResolved,
         onDeletePost = viewModel::delete,
@@ -87,13 +157,62 @@ fun ProfileRoute(
         onToggleSimulateError = viewModel::setSimulateError,
         modifier = modifier,
     )
+
+    if (showRationale) {
+        AlertDialog(
+            onDismissRequest = { showRationale = false },
+            title = { Text(stringResource(R.string.photo_rationale_title)) },
+            text = { Text(stringResource(R.string.photo_rationale_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRationale = false
+                    askForPermission()
+                }) { Text(stringResource(R.string.photo_allow)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRationale = false }) {
+                    Text(stringResource(R.string.photo_cancel))
+                }
+            },
+        )
+    }
+
+    if (showPermanentlyDenied) {
+        AlertDialog(
+            onDismissRequest = { showPermanentlyDenied = false },
+            title = { Text(stringResource(R.string.photo_denied_title)) },
+            text = { Text(stringResource(R.string.photo_denied_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermanentlyDenied = false
+                    val intent = Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", context.packageName, null),
+                    )
+                    try {
+                        context.startActivity(intent)
+                    } catch (_: ActivityNotFoundException) {
+                    }
+                }) { Text(stringResource(R.string.photo_open_settings)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermanentlyDenied = false }) {
+                    Text(stringResource(R.string.photo_cancel))
+                }
+            },
+        )
+    }
 }
 
-/**
- * «Профиль» — stateless. The only `remember` calls left here are `showEdit` /
- * `showSignOut`, which are pure "is this dialog open right now?" UI flags (allowed
- * by the rule); every fact the user would mind losing lives in the ViewModel.
- */
+private fun shouldShowCameraRationale(activity: Activity): Boolean =
+    ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
 @Composable
 fun ProfileScreen(
     uiState: ProfileUiState,
@@ -102,6 +221,8 @@ fun ProfileScreen(
     simulateError: Boolean,
     onOpenPost: (Long) -> Unit,
     onSignOut: () -> Unit,
+    onTakePhoto: () -> Unit,
+    onRemovePhoto: () -> Unit,
     onSaveProfile: (String, String) -> Unit,
     onToggleResolved: (Post) -> Unit,
     onDeletePost: (Post) -> Unit,
@@ -114,6 +235,7 @@ fun ProfileScreen(
 
     var showEdit by remember { mutableStateOf(false) }
     var showSignOut by remember { mutableStateOf(false) }
+    val photoDescription = stringResource(R.string.photo_avatar_description)
 
     Box(modifier = modifier.fillMaxSize().background(colors.bg)) {
         Column(
@@ -121,7 +243,6 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
         ) {
-            // ---- header ------------------------------------------------------
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -134,15 +255,27 @@ fun ProfileScreen(
                     modifier = Modifier
                         .size(Dimens.ProfileAvatar.dp)
                         .clip(CircleShape)
-                        .background(colors.amberSoft),
+                        .background(colors.amberSoft)
+                        .clickable(onClick = onTakePhoto)
+                        .semantics { contentDescription = photoDescription },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = null,
-                        tint = colors.adoptInk,
-                        modifier = Modifier.size(32.dp),
-                    )
+                    val photo = uiState.photo
+                    if (photo != null) {
+                        Image(
+                            bitmap = photo,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = null,
+                            tint = colors.adoptInk,
+                            modifier = Modifier.size(32.dp),
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -156,17 +289,42 @@ fun ProfileScreen(
                     color = colors.inkSoft,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = stringResource(R.string.profile_edit),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.pine,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { showEdit = true }
-                        .padding(horizontal = 10.dp, vertical = 4.dp),
-                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                ) {
+                    Text(
+                        text = stringResource(R.string.profile_edit),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.pine,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { showEdit = true }
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                    )
+                    Text(
+                        text = stringResource(
+                            if (uiState.photo != null) R.string.photo_change else R.string.photo_take,
+                        ),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.pine,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = onTakePhoto)
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                    )
+                    if (uiState.photo != null) {
+                        Text(
+                            text = stringResource(R.string.photo_remove),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colors.inkSoft,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(onClick = onRemovePhoto)
+                                .padding(horizontal = 10.dp, vertical = 4.dp),
+                        )
+                    }
+                }
 
-                // ---- stats strip: hairlines top and bottom -------------------
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -195,7 +353,6 @@ fun ProfileScreen(
                 }
             }
 
-            // ---- «Настройки»: тема, язык и демо-ошибка ---------------------
             SettingsSection(
                 themeMode = themeMode,
                 onThemeMode = onSetTheme,
@@ -209,7 +366,6 @@ fun ProfileScreen(
                 ),
             )
 
-            // ---- «Мои посты» -------------------------------------------------
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -253,7 +409,6 @@ fun ProfileScreen(
                 }
             }
 
-            // ---- «Выйти» ------------------------------------------------------
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -304,7 +459,6 @@ fun ProfileScreen(
             onDismiss = { showSignOut = false },
             onConfirm = {
                 showSignOut = false
-                // The shell observes the profile going null and returns to setup.
                 onSignOut()
             },
         )
@@ -345,11 +499,6 @@ private fun VerticalDivider() {
     )
 }
 
-/**
- * 58 dp row from the «Мои посты» mockup: 40 dp preview, status tag, name, meta and
- * two icon buttons (✓ resolved, 🗑 delete). Resolved rows are dimmed, matching the
- * third row of the design.
- */
 @Composable
 private fun MyPostRow(
     post: Post,
@@ -360,7 +509,6 @@ private fun MyPostRow(
     val colors = LocalQamqorColors.current
     val context = LocalContext.current
 
-    // Resolved posts render at reduced opacity, exactly like the mockup.
     val alpha = if (post.isResolved) 0.55f else 1f
 
     Row(
@@ -422,7 +570,6 @@ private fun MyPostRow(
     }
 }
 
-/** 26 dp outlined icon button used for the ✓ / 🗑 actions. */
 @Composable
 private fun RowActionButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -437,7 +584,6 @@ private fun RowActionButton(
             .clip(RoundedCornerShape(8.dp))
             .background(colors.bg)
             .border(1.dp, colors.line, RoundedCornerShape(8.dp))
-            // The whole box is the tap target; TalkBack reads the action's name.
             .semantics { this.contentDescription = contentDescription }
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -446,14 +592,6 @@ private fun RowActionButton(
     }
 }
 
-/**
- * Preference rows — theme (System / Light / Dark), language (EN / RU) and the
- * demo error switch — rendered as the same [SelectableChip] used by the create
- * form, so the whole app has exactly one chip component.
- *
- * Every chip is [Dimens.CategoryChip] tall inside a 48 dp-wide-plus tap area, and
- * the selected one flips to pine, matching the mockup's chip treatment.
- */
 @Composable
 fun SettingsSection(
     themeMode: ThemeMode,
@@ -520,8 +658,6 @@ fun SettingsSection(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Turns the repository's simulated failure on/off, so the error state can
-        // be demonstrated on the feed during the defense.
         SettingsRow(
             title = stringResource(R.string.settings_debug),
         ) {
@@ -562,7 +698,6 @@ private fun SettingsRow(
     }
 }
 
-/** One theme/language chip, widened to the 48 dp minimum touch target. */
 @Composable
 private fun ThemeChip(
     label: String,

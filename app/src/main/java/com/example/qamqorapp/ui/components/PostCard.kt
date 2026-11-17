@@ -58,7 +58,6 @@ fun StatusTag(status: PostStatus, modifier: Modifier = Modifier) {
     )
 }
 
-/** «Решено» — used in place of the status tag on resolved posts. */
 @Composable
 fun ResolvedTag(modifier: Modifier = Modifier) {
     val c = LocalQamqorColors.current
@@ -86,12 +85,6 @@ private fun TagChip(
     }
 }
 
-/**
- * 56×56 illustration tile with the status tint behind it.
- *
- * `emoji` stands in for what would be a real photo — the concept's placeholder
- * chosen for this build.
- */
 @Composable
 fun EmojiThumb(post: Post, size: Int, modifier: Modifier = Modifier) {
     val c = LocalQamqorColors.current
@@ -108,7 +101,6 @@ fun EmojiThumb(post: Post, size: Int, modifier: Modifier = Modifier) {
             .size(size.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(background)
-            // The emoji itself is decorative; TalkBack reads this instead.
             .semantics { contentDescription = context.getString(R.string.cd_post_emoji) },
         contentAlignment = Alignment.Center,
     ) {
@@ -116,13 +108,6 @@ fun EmojiThumb(post: Post, size: Int, modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * The feed / favorites / profile list row — 76 dp tall, 16 dp radius, hairline
- * border, exactly as the spec table calls for.
- *
- * Reused verbatim on all three screens, which is what makes «Избранное» a one-line
- * screen instead of a second card implementation.
- */
 @Composable
 fun PostCard(
     post: Post,
@@ -177,7 +162,6 @@ fun PostCard(
     }
 }
 
-/** The ☆ / ★ in the card corner. */
 @Composable
 fun BookmarkButton(
     isFavorite: Boolean,
@@ -211,7 +195,6 @@ fun BookmarkButton(
     }
 }
 
-/** «Алмалинский р-н · вчера» — the card's metadata line. */
 @Composable
 private fun districtAndTime(post: Post): String {
     val context = LocalContext.current

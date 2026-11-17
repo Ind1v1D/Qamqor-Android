@@ -29,21 +29,12 @@ data class CreateUiState(
     val districtError: Boolean = false,
 
     val isSaving: Boolean = false,
-    /** Set once the row is in Room; the screen pops itself off the back stack. */
     val published: Boolean = false,
 )
 
-/**
- * «Новое объявление» screen state.
- *
- * The concept's dashed «Добавить фото» box became an emoji picker (no photo
- * pipeline in this build), and the district is a real dropdown over [District]
- * instead of free text — which is what makes the feed's district chips possible.
- */
 class CreateViewModel(
     private val repository: PostRepository,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(CreateUiState())
     val uiState: StateFlow<CreateUiState> = _uiState.asStateFlow()
 
@@ -102,10 +93,8 @@ class CreateViewModel(
         }
     }
 
-    /** Called when the snackbar shown after publishing has been dismissed. */
     fun consumePublished() = _uiState.update { it.copy(published = false) }
 
-    /** Prefills the author's own phone from the profile so it is not typed twice. */
     fun prefillFromProfile() {
         viewModelScope.launch {
             val profile = repository.currentProfile() ?: return@launch

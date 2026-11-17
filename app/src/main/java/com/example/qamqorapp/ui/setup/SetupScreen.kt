@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.R
@@ -40,7 +44,6 @@ import com.example.qamqorapp.ui.qamqorViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
-/** Route: wires the "done" side effect, then hands a plain state to the screen. */
 @Composable
 fun SetupRoute(
     onDone: () -> Unit,
@@ -58,23 +61,23 @@ fun SetupRoute(
 
     SetupScreen(
         uiState = state,
-        onNameChange = viewModel::onNameChange,
-        onPhoneChange = viewModel::onPhoneChange,
+        onUsernameChange = viewModel::onUsernameChange,
+        onPasswordChange = viewModel::onPasswordChange,
         onSubmit = viewModel::submit,
         modifier = modifier,
     )
 }
 
-/** First-run setup — stateless. */
 @Composable
 fun SetupScreen(
     uiState: SetupUiState,
-    onNameChange: (String) -> Unit,
-    onPhoneChange: (String) -> Unit,
+    onUsernameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalQamqorColors.current
+
     Box(modifier = modifier.fillMaxSize().background(colors.panel)) {
         Column(
             modifier = Modifier
@@ -86,7 +89,6 @@ fun SetupScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            // Brand block: the warm gradient tile instead of a logo asset.
             Box(
                 modifier = Modifier
                     .size(Dimens.SetupAvatar.dp)
@@ -113,11 +115,12 @@ fun SetupScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             SetupField(
-                label = stringResource(R.string.setup_name),
-                value = uiState.name,
-                onValueChange = onNameChange,
-                placeholder = stringResource(R.string.setup_name_hint),
-                isError = uiState.nameError,
+                label = stringResource(R.string.login_username),
+                value = uiState.username,
+                onValueChange = onUsernameChange,
+                placeholder = stringResource(R.string.login_username_hint),
+                imeAction = ImeAction.Next,
+                isError = uiState.usernameError,
                 errorText = stringResource(R.string.error_required),
                 leading = {
                     Icon(
@@ -132,18 +135,48 @@ fun SetupScreen(
             Spacer(modifier = Modifier.height(Dimens.FieldGap.dp))
 
             SetupField(
-                label = stringResource(R.string.setup_phone),
-                value = uiState.phone,
-                onValueChange = onPhoneChange,
-                placeholder = stringResource(R.string.setup_phone_hint),
-                keyboardType = KeyboardType.Phone,
-                isError = uiState.phoneError,
-                errorText = stringResource(R.string.error_phone),
+                label = stringResource(R.string.login_password),
+                value = uiState.password,
+                onValueChange = onPasswordChange,
+                placeholder = stringResource(R.string.login_password_hint),
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+                visualTransformation = PasswordVisualTransformation(),
+                isError = uiState.passwordError,
+                errorText = stringResource(R.string.error_required),
+                leading = {
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = null,
+                        tint = colors.inkSoft,
+                        modifier = Modifier.size(18.dp),
+                    )
+                },
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.login_demo_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.amber,
+                modifier = Modifier.clickable {
+                    onUsernameChange("emilys")
+                    onPasswordChange("emilyspass")
+                },
+            )
 
-            // Primary call to action — amber, the single bright accent.
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (uiState.error) {
+                Text(
+                    text = stringResource(R.string.login_error),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.lostInk,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,6 +206,8 @@ private fun SetupField(
     placeholder: String,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     isError: Boolean = false,
     errorText: String? = null,
     leading: (@Composable () -> Unit)? = null,
@@ -184,6 +219,8 @@ private fun SetupField(
         label = label,
         placeholder = placeholder,
         keyboardType = keyboardType,
+        imeAction = imeAction,
+        visualTransformation = visualTransformation,
         isError = isError,
         errorText = errorText,
         leading = leading,

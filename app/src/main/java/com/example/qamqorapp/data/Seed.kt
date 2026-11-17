@@ -5,12 +5,10 @@ import androidx.annotation.StringRes
 import com.example.qamqorapp.R
 import java.util.Calendar
 object Seed {
-
     private const val MINUTE = 60_000L
     private const val HOUR = 60 * MINUTE
     private const val DAY = 24 * HOUR
 
-    /** `now` minus a number of days, at 18:40 local time — «видели вчера, 18:40». */
     private fun atLocalTime(now: Long, daysAgo: Int, hour: Int, minute: Int): Long =
         Calendar.getInstance().apply {
             timeInMillis = now
@@ -21,11 +19,9 @@ object Seed {
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
-    /** Shorthand so each post below reads as a list of fields, not of `getString` calls. */
     private fun Context.text(@StringRes id: Int): String = getString(id)
 
     fun posts(context: Context, now: Long = System.currentTimeMillis()): List<Post> = listOf(
-        // 1 — «Потерян» — the hero card of the feed and the detail mockup.
         Post(
             status = PostStatus.LOST,
             species = Species.DOG,
@@ -44,7 +40,6 @@ object Seed {
             isMine = true,
         ),
 
-        // 2 — «Найдена» — no collar, found 2 days ago.
         Post(
             status = PostStatus.FOUND,
             species = Species.CAT,
@@ -62,7 +57,6 @@ object Seed {
             isFavorite = true,
         ),
 
-        // 3 — «Пристройство» — from the приют «Дос».
         Post(
             status = PostStatus.ADOPT,
             species = Species.CAT,
@@ -80,7 +74,6 @@ object Seed {
             isMine = true,
         ),
 
-        // 4 — «Потерян» — today.
         Post(
             status = PostStatus.LOST,
             species = Species.DOG,
@@ -98,7 +91,6 @@ object Seed {
             isMine = true,
         ),
 
-        // 5 — «Пристройство» — a dog, so the species chips have both values to filter.
         Post(
             status = PostStatus.ADOPT,
             species = Species.DOG,
@@ -115,7 +107,6 @@ object Seed {
             isMine = true,
         ),
 
-        // 6 — a RESOLVED post: visible on the profile (dimmed), gone from the feed.
         Post(
             status = PostStatus.FOUND,
             species = Species.DOG,
@@ -133,7 +124,6 @@ object Seed {
             isMine = true,
         ),
 
-        // 7 — a bird, so Species.OTHER is represented and the filter is honest.
         Post(
             status = PostStatus.FOUND,
             species = Species.OTHER,

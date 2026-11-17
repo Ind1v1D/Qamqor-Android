@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import java.io.IOException
 class RoomPostRepository(private val db: QamqorDatabase) : PostRepository {
-
     private val posts get() = db.postDao()
     private val profiles get() = db.profileDao()
 
@@ -28,8 +27,6 @@ class RoomPostRepository(private val db: QamqorDatabase) : PostRepository {
         emitAll(this@simulateNetwork)
     }.flowOn(Dispatchers.IO)
 
-    // --- feed / lists -----------------------------------------------------------
-
     override fun feed(
         status: PostStatus?,
         species: Species?,
@@ -37,7 +34,6 @@ class RoomPostRepository(private val db: QamqorDatabase) : PostRepository {
         query: String,
     ): Flow<List<Post>> = flow {
         delay(NETWORK_DELAY_MS)
-        // A deliberate failure, so the error state can be demonstrated on demand.
         if (_shouldFail.value) throw IOException("Simulated network error")
         emitAll(posts.observeFeed(status, species, district, query))
     }.flowOn(Dispatchers.IO)
@@ -53,8 +49,6 @@ class RoomPostRepository(private val db: QamqorDatabase) : PostRepository {
     override fun mineCount(): Flow<Int> = posts.observeMineCount()
     override fun mineResolvedCount(): Flow<Int> = posts.observeMineResolvedCount()
 
-    // --- profile ----------------------------------------------------------------
-
     override fun profile(): Flow<Profile?> = profiles.observe(Profile.SINGLETON_ID)
 
     override suspend fun saveProfile(name: String, phone: String) {
@@ -62,8 +56,6 @@ class RoomPostRepository(private val db: QamqorDatabase) : PostRepository {
     }
 
     override suspend fun clearProfile() = profiles.clear()
-
-    // --- post actions ------------------------------------------------------------
 
     override suspend fun toggleFavorite(post: Post) =
         posts.setFavorite(post.id, !post.isFavorite)
@@ -128,7 +120,6 @@ class RoomPostRepository(private val db: QamqorDatabase) : PostRepository {
     }
 
     companion object {
-        /** How long every "server" read pretends to take. */
         const val NETWORK_DELAY_MS = 600L
     }
 }

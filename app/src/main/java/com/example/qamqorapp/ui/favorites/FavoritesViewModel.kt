@@ -15,14 +15,9 @@ data class FavoritesUiState(
     val isLoading: Boolean = true,
 )
 
-/**
- * Favorites screen — literally the same table behind a `isFavorite = 1` filter,
- * which is why the mockup's spec says "those same PostCards, reuse the component".
- */
 class FavoritesViewModel(
     private val repository: PostRepository,
 ) : ViewModel() {
-
     val uiState: StateFlow<FavoritesUiState> =
         repository.favorites()
             .map { FavoritesUiState(posts = it, isLoading = false) }

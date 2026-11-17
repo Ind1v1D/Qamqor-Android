@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -41,6 +42,7 @@ object Routes {
     const val SETUP = "setup"
     const val FEED = "feed"
     const val FAVORITES = "favorites"
+    const val FACTS = "facts"
     const val PROFILE = "profile"
     const val CREATE = "create"
     const val DETAIL = "detail/{postId}"
@@ -61,21 +63,20 @@ private val tabs = listOf(
     TopLevelTab(Routes.FAVORITES, R.string.tab_favorites, Icons.Filled.Star) { tint, m ->
         StarOutlineIcon(tint = tint, modifier = m)
     },
+    TopLevelTab(Routes.FACTS, R.string.tab_facts, Icons.Filled.Info) { tint, m ->
+        Icon(Icons.Filled.Info, contentDescription = null, tint = tint, modifier = m)
+    },
     TopLevelTab(Routes.PROFILE, R.string.tab_profile, Icons.Filled.Person) { tint, m ->
         Icon(Icons.Filled.Person, contentDescription = null, tint = tint, modifier = m)
     },
 )
 
-/** True for the routes that show the tab bar (and, on the feed, the FAB). */
 fun shouldShowBottomBar(route: String?): Boolean =
-    route == Routes.FEED || route == Routes.FAVORITES || route == Routes.PROFILE
+    route == Routes.FEED ||
+        route == Routes.FAVORITES ||
+        route == Routes.FACTS ||
+        route == Routes.PROFILE
 
-/**
- * 56 dp bottom navigation plus the device's navigation-bar inset, per the spec.
- *
- * The bar lives in the shell rather than in each screen, so its height is known
- * when the feed positions its FAB «16dp над нижней навигацией».
- */
 @Composable
 fun QamqorBottomBar(
     currentRoute: String?,
@@ -89,8 +90,6 @@ fun QamqorBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .background(colors.panel)
-            // `.tabbar{border-top:1px solid var(--line)}` — a single hairline over
-            // the whole bar (inset included), not a full rect border.
             .drawBehind {
                 drawLine(
                     color = colors.line,
@@ -133,7 +132,6 @@ fun QamqorBottomBar(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 2.dp),
                 )
-                // The little underline under the active tab.
                 Spacer(modifier = Modifier.height(5.dp))
                 Box(
                     modifier = Modifier

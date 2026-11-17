@@ -31,18 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.example.qamqorapp.R
 import com.example.qamqorapp.ui.theme.Dimens
 
-/**
- * The pine header used by the feed, favorites and create screens.
- *
- * The background deliberately starts *above* the status bar (edge-to-edge): the
- * status-bar inset is applied to the content, not to the surface, so the colour
- * runs behind the system icons — that is what the 64 dp "App Bar" in the spec
- * table measures, inset excluded.
- *
- * @param subtitle optional second line («Алматы · N активных объявлений»).
- * @param navigationIcon optional leading control; when present the layout becomes
- *   56 dp tall, mirroring the «Новый пост» screen's app bar.
- */
 @Composable
 fun QamqorTopBar(
     title: String,
@@ -60,7 +48,6 @@ fun QamqorTopBar(
             .statusBarsPadding(),
     ) {
         if (navigationIcon != null) {
-            // 56 dp bar with a leading icon — «Новый пост».
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -79,7 +66,6 @@ fun QamqorTopBar(
                 )
             }
         } else {
-            // 64 dp brand bar — feed / favorites.
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -110,7 +96,6 @@ fun QamqorTopBar(
     }
 }
 
-/** 32 dp circular back button that sits on top of the detail photo header. */
 @Composable
 fun BackButton(onClick: () -> Unit, contentDescription: String, modifier: Modifier = Modifier) {
     Box(
@@ -130,10 +115,6 @@ fun BackButton(onClick: () -> Unit, contentDescription: String, modifier: Modifi
     }
 }
 
-/**
- * Empty-state block used by the feed and the favorites list: a centred column of
- * emoji + title + body, exactly the shape of the placeholder in the mockup.
- */
 @Composable
 fun EmptyState(
     emoji: String,
@@ -184,7 +165,6 @@ fun EmptyState(
     }
 }
 
-/** A full-screen tinted placeholder (loading / fatal), centred. */
 @Composable
 fun CenteredMessage(text: String, modifier: Modifier = Modifier) {
     val c = com.example.qamqorapp.ui.theme.LocalQamqorColors.current
@@ -193,7 +173,6 @@ fun CenteredMessage(text: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** Spinner shown while the repository "is on the network" (the loading state). */
 @Composable
 fun LoadingState(modifier: Modifier = Modifier) {
     val c = com.example.qamqorapp.ui.theme.LocalQamqorColors.current
@@ -202,12 +181,6 @@ fun LoadingState(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Error state: the friendly face of a failed load, plus a Retry button.
- *
- * [onRetry] is a plain lambda, so this block is part of the *stateless* screen and
- * can be shown from a `@Preview` with a fake state — no ViewModel required.
- */
 @Composable
 fun ErrorState(
     message: String,

@@ -85,8 +85,6 @@ fun FeedScreen(
     val colors = LocalQamqorColors.current
     val context = LocalContext.current
 
-    // «Алматы · 128 активных объявлений» — the count is a live Room query, so the
-    // plural is resolved through the quantity API rather than a hardcoded string.
     val subtitle = stringResource(
         R.string.feed_subtitle,
         stringResource(R.string.feed_city),
@@ -131,8 +129,6 @@ fun FeedScreen(
                 onDistrict = onDistrictSelected,
             )
 
-            // The four situations, in priority order. Each branch is a plain
-            // composable fed by the fake-able UiState.
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 when {
                     uiState.isLoading -> LoadingState()
@@ -167,7 +163,6 @@ fun FeedScreen(
                             start = Dimens.ContentPadding.dp,
                             end = Dimens.ContentPadding.dp,
                             top = Dimens.CardSpacing.dp,
-                            // Leaves room for the FAB so the last card is not hidden.
                             bottom = Dimens.FabSize.dp + Dimens.ContentPadding.dp * 2,
                         ),
                         verticalArrangement = Arrangement.spacedBy(Dimens.CardSpacing.dp),
@@ -207,7 +202,6 @@ fun FeedScreen(
     }
 }
 
-/** The search box: its text lives in the ViewModel, so it survives rotation. */
 @Composable
 private fun SearchField(
     value: String,

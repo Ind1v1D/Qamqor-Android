@@ -16,16 +16,27 @@
     <!-- Tabs -->
     <string name="tab_feed">Лента</string>
     <string name="tab_favorites">Избранное</string>
+    <string name="tab_facts">Факты</string>
     <string name="tab_profile">Профиль</string>
 
-    <!-- First-run profile setup -->
+    <!-- Pet facts loaded from the API -->
+    <string name="facts_title">Факты о питомцах</string>
+    <string name="facts_subtitle">Кошки и собаки</string>
+
+    <!-- First-run login -->
     <string name="setup_title">Добро пожаловать в Qamqor</string>
-    <string name="setup_subtitle">Здесь заботятся о потерянных и найденных питомцах Алматы. Расскажите, кто вы, чтобы с вами могли связаться.</string>
+    <string name="setup_subtitle">Войдите, чтобы публиковать объявления и откликаться на потерянных и найденных питомцев Алматы.</string>
     <string name="setup_name">Ваше имя</string>
     <string name="setup_name_hint">Айгерим К.</string>
     <string name="setup_phone">Номер телефона</string>
     <string name="setup_phone_hint">+7 707 000 00 00</string>
-    <string name="setup_submit">Начать</string>
+    <string name="setup_submit">Войти</string>
+    <string name="login_username">Логин</string>
+    <string name="login_username_hint">emilys</string>
+    <string name="login_password">Пароль</string>
+    <string name="login_password_hint">Ваш пароль</string>
+    <string name="login_demo_hint">Демо-аккаунт: emilys / emilyspass — нажмите, чтобы заполнить</string>
+    <string name="login_error">Не удалось войти. Проверьте логин, пароль и интернет.</string>
 
     <!-- Feed -->
     <string name="feed_city">Алматы</string>
@@ -202,4 +213,18 @@
     <string name="settings_debug">Демо: имитация ошибки</string>
     <string name="debug_on">Вкл</string>
     <string name="debug_off">Выкл</string>
+
+    <!-- Profile photo -->
+    <string name="photo_take">Сделать фото</string>
+    <string name="photo_change">Изменить фото</string>
+    <string name="photo_remove">Удалить фото</string>
+    <string name="photo_avatar_description">Фото профиля. Нажмите, чтобы сделать новое</string>
+    <string name="photo_rationale_title">Доступ к камере</string>
+    <string name="photo_rationale_body">Камера нужна только для того, чтобы сделать фото профиля. Фото хранится на этом устройстве.</string>
+    <string name="photo_allow">Разрешить</string>
+    <string name="photo_denied_title">Камера заблокирована</string>
+    <string name="photo_denied_body">Доступ к камере запрещён. Его можно включить в настройках приложения.</string>
+    <string name="photo_open_settings">Открыть настройки</string>
+    <string name="photo_no_camera">На устройстве не найдено приложение камеры</string>
+    <string name="photo_cancel">Отмена</string>
 </resources>

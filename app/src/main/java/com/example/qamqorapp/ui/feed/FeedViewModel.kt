@@ -28,11 +28,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-
 data class FeedFilters(
-    val status: PostStatus? = null,   // null == the «Все» segment
-    val species: Species? = null,     // the «Собаки» / «Кошки» chips
-    val district: District? = null,   // the district chips
+    val status: PostStatus? = null,
+    val species: Species? = null,
+    val district: District? = null,
 ) {
     val isActive: Boolean
         get() = status != null || species != null || district != null
@@ -49,8 +48,6 @@ data class FeedUiState(
     val hasError: Boolean get() = errorMessage != null
     val isEmpty: Boolean get() = !isLoading && errorMessage == null && posts.isEmpty()
     val isContent: Boolean get() = !isLoading && errorMessage == null && posts.isNotEmpty()
-
-    /** True when a search or a filter is narrowing the feed. */
     val isFiltered: Boolean get() = filters.isActive || query.isNotBlank()
 }
 
@@ -60,7 +57,6 @@ class FeedViewModel(
     private val getFeed: GetFeedUseCase = GetFeedUseCase(repository),
     private val toggleFavorite: ToggleFavoriteUseCase = ToggleFavoriteUseCase(repository),
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(FeedUiState())
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
     private val retryTrigger = MutableStateFlow(0)
@@ -114,16 +110,11 @@ class FeedViewModel(
             .launchIn(viewModelScope)
     }
 
-    // --- events (user actions) --------------------------------------------------
-
-    /** Search by text.*/
     fun onQueryChange(value: String) = _uiState.update { it.copy(query = value) }
 
     fun selectStatus(status: PostStatus?) = updateFilters { copy(status = status) }
 
     fun toggleSpecies(species: Species) = updateFilters {
-        // Tapping the active chip clears it — that is how the user gets back to
-        // "all species" without an extra «Все» chip the mockup does not have.
         copy(species = if (species == this.species) null else species)
     }
 
@@ -133,7 +124,6 @@ class FeedViewModel(
 
     fun onFavouriteClick(post: Post) = viewModelScope.launch { toggleFavorite(post) }
 
-    /** Retry after an error */
     fun onRetry() {
         retryTrigger.update { it + 1 }
     }

@@ -38,7 +38,6 @@ private class FakePostRepository(
     var posts: List<Post> = emptyList(),
     var fail: Boolean = false,
 ) : PostRepository {
-
     private val _shouldFail = MutableStateFlow(false)
     override val shouldFail: StateFlow<Boolean> = _shouldFail
 
@@ -59,7 +58,6 @@ private class FakePostRepository(
 
     override fun activeCount(): Flow<Int> = flow { emit(posts.size) }
 
-    // --- not exercised by these tests ------------------------------------------
     override fun favorites(): Flow<List<Post>> = error("not used")
     override fun post(id: Long): Flow<Post?> = error("not used")
     override fun myPosts(): Flow<List<Post>> = error("not used")
@@ -97,7 +95,6 @@ private class FakePostRepository(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FeedViewModelTest {
-
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 

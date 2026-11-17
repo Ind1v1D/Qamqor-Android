@@ -23,7 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.qamqorapp.ui.theme.Dimens
@@ -36,6 +38,8 @@ fun QamqorField(
     label: String? = null,
     placeholder: String = "",
     keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     singleLine: Boolean = true,
     minHeight: Dp = Dimens.InputHeight.dp,
     isError: Boolean = false,
@@ -82,11 +86,9 @@ fun QamqorField(
                 textStyle = textStyle,
                 cursorBrush = SolidColor(colors.pine),
                 singleLine = singleLine,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+                visualTransformation = visualTransformation,
                 decorationBox = { innerTextField ->
-                    // `.field .input` is 12px on the sides, 10px top and bottom.
-                    // The single-line case centres that box in the 44 dp; the
-                    // description field (96 dp) pins the text to the top instead.
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -120,8 +122,6 @@ fun QamqorField(
                 },
             )
 
-            // A transparent overlay absorbs the taps for dropdown-style fields: a
-            // `readOnly` field would otherwise swallow them trying to focus.
             if (onBoxClick != null) {
                 Box(
                     modifier = Modifier

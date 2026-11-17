@@ -1,7 +1,7 @@
 package com.example.qamqorapp
-
-import android.content.Context
-import android.content.res.Configuration
+import android.content.ContextWrapper
+import android.content.res.AssetManager
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -17,13 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.data.ThemeMode
+import com.example.qamqorapp.ui.localizedFor
 import com.example.qamqorapp.ui.navigation.AppShell
 import com.example.qamqorapp.ui.theme.QamqorTheme
-import java.util.Locale
-
-
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
         enableEdgeToEdge(
@@ -37,26 +34,21 @@ class MainActivity : ComponentActivity() {
             ),
         )
         super.onCreate(savedInstanceState)
-
         val settings = (application as QamqorApp).container.settings
-
         setContent {
             AppTheme(settings) {
                 AppShell()
             }
         }
     }
-
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart")
     }
-
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume")
     }
-
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause")
@@ -76,8 +68,6 @@ class MainActivity : ComponentActivity() {
         const val TAG = "QamqorLifecycle"
     }
 }
-
-
 @Composable
 private fun AppTheme(
     settings: com.example.qamqorapp.data.SettingsRepository,
@@ -94,18 +84,14 @@ private fun AppTheme(
 
     val baseContext = LocalContext.current
     val localizedContext = remember(language, baseContext) {
-        baseContext.localizedFor(language)
+        val localized = baseContext.localizedFor(language)
+        object : ContextWrapper(baseContext) {
+            override fun getResources(): Resources = localized.resources
+            override fun getAssets(): AssetManager = localized.assets
+        }
     }
 
     CompositionLocalProvider(LocalContext provides localizedContext) {
         QamqorTheme(darkTheme = darkTheme, content = content)
     }
-}
-
-private fun Context.localizedFor(tag: String): Context {
-    val locale = if (tag.equals("ru", ignoreCase = true)) Locale("ru") else Locale("en")
-    Locale.setDefault(locale)
-    val config = Configuration(resources.configuration)
-    config.setLocale(locale)
-    return createConfigurationContext(config)
 }
