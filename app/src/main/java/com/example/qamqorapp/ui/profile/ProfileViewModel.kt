@@ -1,16 +1,22 @@
 package com.example.qamqorapp.ui.profile
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qamqorapp.data.Post
 import com.example.qamqorapp.data.PostRepository
 import com.example.qamqorapp.data.Profile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 data class ProfileUiState(
     val profile: Profile? = null,
@@ -30,6 +36,9 @@ class ProfileViewModel(
     val language: StateFlow<String> = settings.language
 
     val simulateError: StateFlow<Boolean> = repository.shouldFail
+
+    private val _avatar = MutableStateFlow<Bitmap?>(null)
+    val avatar: StateFlow<Bitmap?> = _avatar
 
     val uiState: StateFlow<ProfileUiState> =
         combine(
@@ -79,6 +88,36 @@ class ProfileViewModel(
         repository.reseedDemo(context)
     }
 
+    fun loadAvatar(dir: File) {
+        if (_avatar.value != null) return
+        viewModelScope.launch {
+            val bitmap = withContext(Dispatchers.IO) {
+                val file = File(dir, AVATAR_FILE)
+                if (file.exists()) BitmapFactory.decodeFile(file.absolutePath) else null
+            }
+            if (bitmap != null) _avatar.value = bitmap
+        }
+    }
+
+    fun saveAvatar(bitmap: Bitmap, dir: File) {
+        viewModelScope.launch {
+            val saved = withContext(Dispatchers.IO) {
+                runCatching {
+                    val tmp = File(dir, "$AVATAR_FILE.tmp")
+                    tmp.outputStream().use { out ->
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+                    }
+                    val target = File(dir, AVATAR_FILE)
+                    if (!tmp.renameTo(target)) {
+                        target.delete()
+                        check(tmp.renameTo(target))
+                    }
+                }.isSuccess
+            }
+            if (saved) _avatar.value = bitmap
+        }
+    }
+
     fun setSimulateError(value: Boolean) {
         repository.setSimulateError(value)
     }
@@ -94,5 +133,6 @@ class ProfileViewModel(
 
     private companion object {
         const val TAG = "ProfileViewModel"
+        const val AVATAR_FILE = "avatar.jpg"
     }
 }

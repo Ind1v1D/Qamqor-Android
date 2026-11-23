@@ -18,10 +18,6 @@ import com.example.qamqorapp.ui.feed.FeedViewModel
 import com.example.qamqorapp.ui.navigation.AppShellViewModel
 import com.example.qamqorapp.ui.profile.ProfileViewModel
 import com.example.qamqorapp.ui.setup.SetupViewModel
-
-/**
- * One factory for every ViewModel in the app.
- */
 class QamqorFactory(
     private val repositoryProvider: () -> PostRepository,
     private val settingsProvider: () -> SettingsRepository,
@@ -58,7 +54,6 @@ class QamqorFactory(
     }
 }
 
-/** Bound to this process's container and stable across recompositions. */
 @Composable
 fun rememberQamqorFactory(): QamqorFactory {
     val context = LocalContext.current
@@ -70,9 +65,7 @@ fun rememberQamqorFactory(): QamqorFactory {
     }
 }
 
-/**
- * Shorthand used by every screen: `val vm = qamqorViewModel<FeedViewModel>()`.
- */
+
 @Composable
 inline fun <reified VM : ViewModel> qamqorViewModel(
     key: String? = null,

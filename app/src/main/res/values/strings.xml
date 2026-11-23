@@ -195,4 +195,7 @@
     <string name="settings_debug">Demo: simulate error</string>
     <string name="debug_on">On</string>
     <string name="debug_off">Off</string>
+    <string name="profile_add_photo">Change photo</string>
+    <string name="profile_camera_denied">Camera permission is needed to take a profile photo</string>
+    <string name="profile_camera_unavailable">No camera app available</string>
 </resources>

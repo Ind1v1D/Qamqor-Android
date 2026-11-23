@@ -202,4 +202,7 @@
     <string name="settings_debug">Демо: имитация ошибки</string>
     <string name="debug_on">Вкл</string>
     <string name="debug_off">Выкл</string>
+    <string name="profile_add_photo">Изменить фото</string>
+    <string name="profile_camera_denied">Для фото профиля нужно разрешение на камеру</string>
+    <string name="profile_camera_unavailable">Нет приложения камеры</string>
 </resources>

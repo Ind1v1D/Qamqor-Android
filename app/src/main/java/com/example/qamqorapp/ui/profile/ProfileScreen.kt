@@ -1,5 +1,12 @@
 package com.example.qamqorapp.ui.profile
 
+import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,6 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
@@ -28,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,12 +45,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.R
 import com.example.qamqorapp.data.Post
@@ -71,6 +85,32 @@ fun ProfileRoute(
     val simulateError by viewModel.simulateError.collectAsStateWithLifecycle()
     // Only the route sees the Android context; the screen stays framework-free.
     val context = LocalContext.current
+    val avatar by viewModel.avatar.collectAsStateWithLifecycle()
+    val avatarImage = remember(avatar) { avatar?.asImageBitmap() }
+
+    LaunchedEffect(Unit) { viewModel.loadAvatar(context.filesDir) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicturePreview(),
+    ) { bitmap ->
+        if (bitmap != null) viewModel.saveAvatar(bitmap, context.filesDir)
+    }
+    val launchCamera = {
+        try {
+            cameraLauncher.launch(null)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context, R.string.profile_camera_unavailable, Toast.LENGTH_LONG).show()
+        }
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            launchCamera()
+        } else {
+            Toast.makeText(context, R.string.profile_camera_denied, Toast.LENGTH_LONG).show()
+        }
+    }
 
     ProfileScreen(
         uiState = state,
@@ -85,6 +125,18 @@ fun ProfileRoute(
         onSetTheme = viewModel::setTheme,
         onSetLanguage = { tag -> viewModel.setLanguage(tag, context) },
         onToggleSimulateError = viewModel::setSimulateError,
+        avatar = avatarImage,
+        onAvatarClick = {
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA,
+            ) == PackageManager.PERMISSION_GRANTED
+            if (granted) {
+                launchCamera()
+            } else {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        },
         modifier = modifier,
     )
 }
@@ -109,6 +161,8 @@ fun ProfileScreen(
     onSetLanguage: (String) -> Unit,
     onToggleSimulateError: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    avatar: ImageBitmap? = null,
+    onAvatarClick: () -> Unit = {},
 ) {
     val colors = LocalQamqorColors.current
 
@@ -130,19 +184,51 @@ fun ProfileScreen(
                     .padding(horizontal = Dimens.ContentPadding.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(Dimens.ProfileAvatar.dp)
-                        .clip(CircleShape)
-                        .background(colors.amberSoft),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = null,
-                        tint = colors.adoptInk,
-                        modifier = Modifier.size(32.dp),
-                    )
+                val addPhotoLabel = stringResource(R.string.profile_add_photo)
+                Box(modifier = Modifier.size(Dimens.ProfileAvatar.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(colors.amberSoft)
+                            .clickable(
+                                onClickLabel = addPhotoLabel,
+                                role = Role.Button,
+                                onClick = onAvatarClick,
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (avatar != null) {
+                            Image(
+                                bitmap = avatar,
+                                contentDescription = addPhotoLabel,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = addPhotoLabel,
+                                tint = colors.adoptInk,
+                                modifier = Modifier.size(32.dp),
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(20.dp)
+                            .clip(CircleShape)
+                            .background(colors.pine),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null,
+                            tint = colors.panel,
+                            modifier = Modifier.size(14.dp),
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(

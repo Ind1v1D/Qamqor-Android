@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -41,8 +42,10 @@ class MainActivity : ComponentActivity() {
         val settings = (application as QamqorApp).container.settings
 
         setContent {
-            AppTheme(settings) {
-                AppShell()
+            CompositionLocalProvider(LocalActivityResultRegistryOwner provides this) {
+                AppTheme(settings) {
+                    AppShell()
+                }
             }
         }
     }
