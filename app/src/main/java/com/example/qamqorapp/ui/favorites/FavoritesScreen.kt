@@ -21,7 +21,7 @@ import com.example.qamqorapp.ui.components.EmptyState
 import com.example.qamqorapp.ui.components.LoadingState
 import com.example.qamqorapp.ui.components.PostCard
 import com.example.qamqorapp.ui.components.QamqorTopBar
-import com.example.qamqorapp.ui.qamqorViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
@@ -30,7 +30,7 @@ fun FavoritesRoute(
     onOpenPost: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = qamqorViewModel<FavoritesViewModel>()
+    val viewModel = koinViewModel<FavoritesViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     FavoritesScreen(

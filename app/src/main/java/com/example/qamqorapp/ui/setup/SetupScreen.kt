@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.R
 import com.example.qamqorapp.ui.components.QamqorField
-import com.example.qamqorapp.ui.qamqorViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
@@ -49,7 +49,7 @@ fun SetupRoute(
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = qamqorViewModel<SetupViewModel>()
+    val viewModel = koinViewModel<SetupViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.done) {

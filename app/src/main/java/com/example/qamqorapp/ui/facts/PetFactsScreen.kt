@@ -28,12 +28,12 @@ import com.example.qamqorapp.domain.model.PetFact
 import com.example.qamqorapp.ui.components.ErrorState
 import com.example.qamqorapp.ui.components.LoadingState
 import com.example.qamqorapp.ui.components.QamqorTopBar
-import com.example.qamqorapp.ui.qamqorViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 @Composable
 fun PetFactsRoute(modifier: Modifier = Modifier) {
-    val viewModel = qamqorViewModel<PetFactsViewModel>()
+    val viewModel = koinViewModel<PetFactsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     PetFactsScreen(

@@ -46,7 +46,7 @@ import com.example.qamqorapp.ui.components.BackButton
 import com.example.qamqorapp.ui.components.QamqorField
 import com.example.qamqorapp.ui.components.QamqorTopBar
 import com.example.qamqorapp.ui.components.dashedBorder
-import com.example.qamqorapp.ui.qamqorViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.components.SelectableChip
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
@@ -57,7 +57,7 @@ fun CreateRoute(
     onPublished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = qamqorViewModel<CreateViewModel>()
+    val viewModel = koinViewModel<CreateViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { viewModel.prefillFromProfile() }

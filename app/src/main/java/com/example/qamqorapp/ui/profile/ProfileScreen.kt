@@ -72,7 +72,7 @@ import com.example.qamqorapp.ui.components.SelectableChip
 import com.example.qamqorapp.ui.components.StatusTag
 import com.example.qamqorapp.ui.dialogs.ConfirmDialog
 import com.example.qamqorapp.ui.dialogs.EditProfileDialog
-import com.example.qamqorapp.ui.qamqorViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.util.RelativeTime
@@ -84,7 +84,7 @@ fun ProfileRoute(
     onOpenPost: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = qamqorViewModel<ProfileViewModel>()
+    val viewModel = koinViewModel<ProfileViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val language by viewModel.language.collectAsStateWithLifecycle()

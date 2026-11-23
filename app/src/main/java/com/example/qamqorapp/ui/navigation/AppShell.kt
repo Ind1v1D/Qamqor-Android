@@ -27,14 +27,14 @@ import com.example.qamqorapp.ui.facts.PetFactsRoute
 import com.example.qamqorapp.ui.favorites.FavoritesRoute
 import com.example.qamqorapp.ui.feed.FeedRoute
 import com.example.qamqorapp.ui.profile.ProfileRoute
-import com.example.qamqorapp.ui.qamqorViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.setup.SetupRoute
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.ui.theme.SetStatusBarIconStyle
 @Composable
 fun AppShell() {
-    val viewModel = qamqorViewModel<AppShellViewModel>()
+    val viewModel = koinViewModel<AppShellViewModel>()
     val hasProfile by viewModel.hasProfile.collectAsStateWithLifecycle()
 
     if (hasProfile == null) {

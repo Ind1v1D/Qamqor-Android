@@ -42,7 +42,7 @@ import com.example.qamqorapp.ui.components.PostCard
 import com.example.qamqorapp.ui.components.QamqorField
 import com.example.qamqorapp.ui.components.QamqorTopBar
 import com.example.qamqorapp.ui.components.StatusSegments
-import com.example.qamqorapp.ui.qamqorViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 @Composable
@@ -51,7 +51,7 @@ fun FeedRoute(
     onCreatePost: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = qamqorViewModel<FeedViewModel>()
+    val viewModel = koinViewModel<FeedViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     FeedScreen(

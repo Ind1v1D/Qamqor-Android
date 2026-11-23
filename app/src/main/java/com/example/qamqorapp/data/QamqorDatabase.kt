@@ -1,8 +1,6 @@
 package com.example.qamqorapp.data
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
@@ -24,17 +22,5 @@ abstract class QamqorDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE posts ADD COLUMN isSeed INTEGER NOT NULL DEFAULT 0")
             }
         }
-        @Volatile
-        private var instance: QamqorDatabase? = null
-
-        fun get(context: Context): QamqorDatabase =
-            instance ?: synchronized(this) {
-                instance ?: build(context.applicationContext).also { instance = it }
-            }
-
-        private fun build(context: Context): QamqorDatabase =
-            Room.databaseBuilder(context, QamqorDatabase::class.java, "qamqor.db")
-                .addMigrations(MIGRATION_1_2).fallbackToDestructiveMigration(dropAllTables = true)
-                .build()
     }
 }

@@ -16,10 +16,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.qamqorapp.data.SettingsRepository
 import com.example.qamqorapp.data.ThemeMode
 import com.example.qamqorapp.ui.localizedFor
 import com.example.qamqorapp.ui.navigation.AppShell
 import com.example.qamqorapp.ui.theme.QamqorTheme
+import org.koin.android.ext.android.inject
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
@@ -34,7 +36,7 @@ class MainActivity : ComponentActivity() {
             ),
         )
         super.onCreate(savedInstanceState)
-        val settings = (application as QamqorApp).container.settings
+        val settings: SettingsRepository by inject()
         setContent {
             AppTheme(settings) {
                 AppShell()

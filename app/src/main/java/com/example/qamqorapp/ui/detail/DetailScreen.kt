@@ -53,7 +53,7 @@ import com.example.qamqorapp.ui.components.EmojiThumb
 import com.example.qamqorapp.ui.components.ResolvedTag
 import com.example.qamqorapp.ui.components.StarOutlineIcon
 import com.example.qamqorapp.ui.components.statusLabel
-import com.example.qamqorapp.ui.qamqorViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 import com.example.qamqorapp.util.RelativeTime
@@ -62,7 +62,7 @@ fun DetailRoute(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = qamqorViewModel<DetailViewModel>()
+    val viewModel = koinViewModel<DetailViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     DetailScreen(
