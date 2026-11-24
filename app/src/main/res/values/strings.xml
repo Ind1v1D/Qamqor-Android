@@ -31,12 +31,12 @@
     <string name="setup_phone">Phone number</string>
     <string name="setup_phone_hint">+7 707 000 00 00</string>
     <string name="setup_submit">Sign in</string>
-    <string name="login_username">Username</string>
-    <string name="login_username_hint">emilys</string>
+    <string name="setup_register">Create account</string>
+    <string name="login_username">Email</string>
+    <string name="login_username_hint">you@example.com</string>
     <string name="login_password">Password</string>
     <string name="login_password_hint">Your password</string>
-    <string name="login_demo_hint">Demo account: emilys / emilyspass — tap to fill</string>
-    <string name="login_error">Could not sign in. Check your username, password and connection.</string>
+    <string name="login_error">Could not sign in. Check your email, password (at least 6 characters) and connection.</string>
 
     <!-- Feed -->
     <string name="feed_city">Almaty</string>
@@ -220,4 +220,18 @@
     <string name="photo_open_settings">Open settings</string>
     <string name="photo_no_camera">No camera app found on this device</string>
     <string name="photo_cancel">Cancel</string>
+    <string name="auth_error_weak_password">Use at least 6 characters.</string>
+    <string name="auth_error_invalid_credentials">Wrong email or password.</string>
+    <string name="auth_error_email_in_use">This email already has an account.</string>
+    <string name="auth_error_network">No connection. Try again.</string>
+    <string name="auth_error_generic">Something went wrong. Try again.</string>
+    <string name="cloud_error_permission">No access to your posts. Sign in again.</string>
+    <string name="cloud_error_offline">No connection. Try again.</string>
+    <string name="cloud_error_signed_out">You are signed out. Sign in again.</string>
+    <string name="cloud_error_generic">Could not sync your posts. Try again.</string>
+    <string name="my_posts_loading">Loading your posts…</string>
+    <string name="profile_mark_active">Mark as active</string>
+    <string name="notification_channel_id" translatable="false">qamqor_alerts</string>
+    <string name="notification_channel_name">Pet alerts</string>
+    <string name="notification_channel_description">News about lost and found pets</string>
 </resources>

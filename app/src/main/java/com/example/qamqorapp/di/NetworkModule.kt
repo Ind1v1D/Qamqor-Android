@@ -1,7 +1,6 @@
 package com.example.qamqorapp.di
 
 import com.example.qamqorapp.BuildConfig
-import com.example.qamqorapp.data.AuthApi
 import com.example.qamqorapp.data.remote.CatFactsApi
 import com.example.qamqorapp.data.remote.DogFactsApi
 import kotlinx.serialization.json.Json
@@ -35,15 +34,6 @@ val networkModule = module {
             .build()
     }
 
-    // DummyJSON (default Retrofit)
-    single {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.API_BASE_URL)
-            .client(get())
-            .addConverterFactory(get<Json>().asConverterFactory("application/json".toMediaType()))
-            .build()
-    }
-
     // Cat and dog APIs have other base URLs, so they get names (qualifiers)
     single(named("cat")) {
         Retrofit.Builder()
@@ -61,7 +51,6 @@ val networkModule = module {
             .build()
     }
 
-    single<AuthApi> { get<Retrofit>().create(AuthApi::class.java) }
     single<CatFactsApi> { get<Retrofit>(named("cat")).create(CatFactsApi::class.java) }
     single<DogFactsApi> { get<Retrofit>(named("dog")).create(DogFactsApi::class.java) }
 }

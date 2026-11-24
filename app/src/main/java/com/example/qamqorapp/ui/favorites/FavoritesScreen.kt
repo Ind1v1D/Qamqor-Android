@@ -1,5 +1,7 @@
 package com.example.qamqorapp.ui.favorites
 
+import com.example.qamqorapp.ui.components.TrackScreen
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +34,8 @@ fun FavoritesRoute(
 ) {
     val viewModel = koinViewModel<FavoritesViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    TrackScreen("favorites")
 
     FavoritesScreen(
         uiState = state,

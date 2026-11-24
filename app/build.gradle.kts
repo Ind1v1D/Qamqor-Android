@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.screenshot)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -22,8 +23,6 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
-
-        buildConfigField("String", "API_BASE_URL", "\"https://dummyjson.com/\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -91,6 +90,13 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.analytics)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     testImplementation(libs.koin.test)
     testImplementation(libs.koin.test.junit4)

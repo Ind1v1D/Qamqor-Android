@@ -31,12 +31,12 @@
     <string name="setup_phone">Номер телефона</string>
     <string name="setup_phone_hint">+7 707 000 00 00</string>
     <string name="setup_submit">Войти</string>
-    <string name="login_username">Логин</string>
-    <string name="login_username_hint">emilys</string>
+    <string name="setup_register">Создать аккаунт</string>
+    <string name="login_username">Эл. почта</string>
+    <string name="login_username_hint">you@example.com</string>
     <string name="login_password">Пароль</string>
     <string name="login_password_hint">Ваш пароль</string>
-    <string name="login_demo_hint">Демо-аккаунт: emilys / emilyspass — нажмите, чтобы заполнить</string>
-    <string name="login_error">Не удалось войти. Проверьте логин, пароль и интернет.</string>
+    <string name="login_error">Не удалось войти. Проверьте почту, пароль (не менее 6 символов) и интернет.</string>
 
     <!-- Feed -->
     <string name="feed_city">Алматы</string>
@@ -227,4 +227,17 @@
     <string name="photo_open_settings">Открыть настройки</string>
     <string name="photo_no_camera">На устройстве не найдено приложение камеры</string>
     <string name="photo_cancel">Отмена</string>
+    <string name="auth_error_weak_password">Используйте не меньше 6 символов.</string>
+    <string name="auth_error_invalid_credentials">Неверный email или пароль.</string>
+    <string name="auth_error_email_in_use">Для этого email уже есть аккаунт.</string>
+    <string name="auth_error_network">Нет соединения. Попробуйте ещё раз.</string>
+    <string name="auth_error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
+    <string name="cloud_error_permission">Нет доступа к вашим объявлениям. Войдите снова.</string>
+    <string name="cloud_error_offline">Нет соединения. Попробуйте ещё раз.</string>
+    <string name="cloud_error_signed_out">Вы вышли из аккаунта. Войдите снова.</string>
+    <string name="cloud_error_generic">Не удалось синхронизировать объявления. Попробуйте ещё раз.</string>
+    <string name="my_posts_loading">Загружаем ваши объявления…</string>
+    <string name="profile_mark_active">Снова активно</string>
+    <string name="notification_channel_name">Оповещения о питомцах</string>
+    <string name="notification_channel_description">Новости о потерянных и найденных питомцах</string>
 </resources>

@@ -10,30 +10,19 @@ interface PostRepository {
         district: District?,
         query: String,
     ): Flow<List<Post>>
-
     fun favorites(): Flow<List<Post>>
-
     fun post(id: Long): Flow<Post?>
-
     fun myPosts(): Flow<List<Post>>
-
     fun activeCount(): Flow<Int>
     fun favoriteCount(): Flow<Int>
     fun mineCount(): Flow<Int>
     fun mineResolvedCount(): Flow<Int>
-
     fun profile(): Flow<Profile?>
-
     suspend fun saveProfile(name: String, phone: String)
-
     suspend fun clearProfile()
-
     suspend fun toggleFavorite(post: Post)
-
     suspend fun setFavorite(id: Long, favorite: Boolean)
-
     suspend fun setResolved(id: Long, resolved: Boolean)
-
     suspend fun delete(id: Long)
     suspend fun publish(
         status: PostStatus,

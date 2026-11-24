@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.qamqorapp.data.Post
 import com.example.qamqorapp.data.PostRepository
 import com.example.qamqorapp.data.Profile
 import com.example.qamqorapp.data.local.PhotoDecoder
@@ -25,9 +24,6 @@ import kotlinx.coroutines.withContext
 
 data class ProfileUiState(
     val profile: Profile? = null,
-    val myPosts: List<Post> = emptyList(),
-    val published: Int = 0,
-    val resolved: Int = 0,
     val favorites: Int = 0,
     val isLoading: Boolean = true,
     val photo: ImageBitmap? = null,
@@ -50,16 +46,10 @@ class ProfileViewModel(
     val uiState: StateFlow<ProfileUiState> =
         combine(
             repository.profile(),
-            repository.myPosts(),
-            repository.mineCount(),
-            repository.mineResolvedCount(),
             repository.favoriteCount(),
-        ) { profile, myPosts, published, resolved, favorites ->
+        ) { profile, favorites ->
             ProfileUiState(
                 profile = profile,
-                myPosts = myPosts,
-                published = published,
-                resolved = resolved,
                 favorites = favorites,
                 isLoading = false,
             )
@@ -70,18 +60,6 @@ class ProfileViewModel(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = ProfileUiState(),
         )
-
-    fun toggleResolved(post: Post) = viewModelScope.launch {
-        repository.setResolved(post.id, !post.isResolved)
-    }
-
-    fun delete(post: Post) = viewModelScope.launch {
-        repository.delete(post.id)
-    }
-
-    fun toggleFavorite(post: Post) = viewModelScope.launch {
-        repository.toggleFavorite(post)
-    }
 
     fun saveProfile(name: String, phone: String) = viewModelScope.launch {
         repository.saveProfile(name.trim(), phone.trim())

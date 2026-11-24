@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -49,6 +51,7 @@ import com.example.qamqorapp.ui.components.dashedBorder
 import org.koin.androidx.compose.koinViewModel
 import com.example.qamqorapp.ui.theme.Dimens
 import com.example.qamqorapp.ui.components.SelectableChip
+import com.example.qamqorapp.ui.components.TrackScreen
 import com.example.qamqorapp.ui.theme.LocalQamqorColors
 
 @Composable
@@ -59,6 +62,8 @@ fun CreateRoute(
 ) {
     val viewModel = koinViewModel<CreateViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    TrackScreen("create")
 
     LaunchedEffect(Unit) { viewModel.prefillFromProfile() }
 
@@ -196,20 +201,42 @@ fun CreateScreen(
                     vertical = 12.dp,
                 ),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(Dimens.SubmitButton.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(colors.amber)
-                    .clickable(enabled = !uiState.isSaving) { onSubmit() },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(R.string.create_submit),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color.White,
-                )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                val publishError = uiState.publishError
+                if (publishError != null) {
+                    Text(
+                        text = stringResource(publishError.messageRes),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.lostInk,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(Dimens.SubmitButton.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(colors.amber)
+                        .alpha(if (uiState.isSaving) 0.6f else 1f)
+                        .clickable(enabled = !uiState.isSaving) { onSubmit() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (uiState.isSaving) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.create_submit),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.White,
+                        )
+                    }
+                }
             }
         }
     }

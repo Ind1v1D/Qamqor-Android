@@ -1,5 +1,7 @@
 package com.example.qamqorapp.ui.feed
 
+import com.example.qamqorapp.ui.components.TrackScreen
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +55,8 @@ fun FeedRoute(
 ) {
     val viewModel = koinViewModel<FeedViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    TrackScreen("feed")
 
     FeedScreen(
         uiState = state,

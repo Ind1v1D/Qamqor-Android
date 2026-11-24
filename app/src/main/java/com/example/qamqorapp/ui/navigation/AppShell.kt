@@ -22,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.qamqorapp.ui.components.CenteredMessage
 import com.example.qamqorapp.ui.create.CreateRoute
+import com.example.qamqorapp.ui.detail.CloudDetailRoute
 import com.example.qamqorapp.ui.detail.DetailRoute
 import com.example.qamqorapp.ui.facts.PetFactsRoute
 import com.example.qamqorapp.ui.favorites.FavoritesRoute
@@ -51,7 +52,7 @@ fun AppShell() {
 @Composable
 private fun AppNavHost(
     startDestination: String,
-    onSignOut: () -> Unit,
+    onSignOut: (onDone: () -> Unit) -> Unit,
 ) {
     val navController = rememberNavController()
     val colors = LocalQamqorColors.current
@@ -66,7 +67,8 @@ private fun AppNavHost(
         currentRoute == Routes.FAVORITES ||
         currentRoute == Routes.FACTS ||
         currentRoute == Routes.CREATE ||
-        currentRoute?.startsWith("detail/") == true
+        currentRoute?.startsWith("detail/") == true ||
+        currentRoute?.startsWith("mypost/") == true
     SetStatusBarIconStyle(light = darkHeader)
 
     Box(modifier = Modifier.fillMaxSize().background(colors.bg)) {
@@ -106,11 +108,12 @@ private fun AppNavHost(
 
             composable(Routes.PROFILE) {
                 ProfileRoute(
-                    onOpenPost = { navController.navigate(Routes.detail(it)) },
+                    onOpenPost = { navController.navigate(Routes.myPost(it)) },
                     onSignOut = {
-                        onSignOut()
-                        navController.navigate(Routes.SETUP) {
-                            popUpTo(0) { inclusive = true }
+                        onSignOut {
+                            navController.navigate(Routes.SETUP) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     },
                 )
@@ -128,6 +131,15 @@ private fun AppNavHost(
                 arguments = listOf(navArgument("postId") { type = NavType.LongType }),
             ) {
                 DetailRoute(
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+            composable(
+                route = Routes.MY_POST,
+                arguments = listOf(navArgument("postId") { type = NavType.StringType }),
+            ) {
+                CloudDetailRoute(
                     onBack = { navController.popBackStack() },
                 )
             }

@@ -1,5 +1,7 @@
 package com.example.qamqorapp.ui.detail
 
+import com.example.qamqorapp.ui.components.TrackScreen
+
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -65,6 +67,26 @@ fun DetailRoute(
     val viewModel = koinViewModel<DetailViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    TrackScreen("detail")
+
+    DetailScreen(
+        uiState = state,
+        onBack = onBack,
+        onToggleFavorite = viewModel::toggleFavorite,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun CloudDetailRoute(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val viewModel = koinViewModel<CloudDetailViewModel>()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    TrackScreen("my_post_detail")
+
     DetailScreen(
         uiState = state,
         onBack = onBack,
@@ -85,6 +107,13 @@ fun DetailScreen(
     when {
         uiState.isLoading -> {
             Box(modifier = modifier.fillMaxSize().background(colors.panel))
+        }
+
+        uiState.error != null -> {
+            CenteredMessage(
+                text = stringResource(uiState.error.messageRes),
+                modifier = modifier,
+            )
         }
 
         uiState.missing -> {

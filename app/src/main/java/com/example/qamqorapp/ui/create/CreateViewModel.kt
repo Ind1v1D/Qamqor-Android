@@ -2,10 +2,16 @@ package com.example.qamqorapp.ui.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qamqorapp.analytics.AnalyticsTracker
+import com.example.qamqorapp.data.CloudPost
+import com.example.qamqorapp.data.CloudPostsRepository
 import com.example.qamqorapp.data.District
 import com.example.qamqorapp.data.PostRepository
 import com.example.qamqorapp.data.PostStatus
 import com.example.qamqorapp.data.Species
+import com.example.qamqorapp.ui.CloudError
+import com.example.qamqorapp.ui.toCloudError
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,10 +36,13 @@ data class CreateUiState(
 
     val isSaving: Boolean = false,
     val published: Boolean = false,
+    val publishError: CloudError? = null,
 )
 
 class CreateViewModel(
     private val repository: PostRepository,
+    private val cloud: CloudPostsRepository,
+    private val analytics: AnalyticsTracker,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CreateUiState())
     val uiState: StateFlow<CreateUiState> = _uiState.asStateFlow()
@@ -73,23 +82,32 @@ class CreateViewModel(
             return
         }
 
-        _uiState.update { it.copy(isSaving = true) }
+        _uiState.update { it.copy(isSaving = true, publishError = null) }
         viewModelScope.launch {
-            val author = repository.currentProfile()?.name.orEmpty()
-            repository.publish(
-                status = state.status,
-                species = state.species,
-                name = state.name.trim(),
-                district = state.district ?: District.ALMALINSKY,
-                address = state.address.trim(),
-                marks = state.marks.trim(),
-                description = state.description.trim(),
-                emoji = state.emoji,
-                phone = state.phone.trim(),
-                breed = state.breed.trim(),
-                author = author,
-            )
-            _uiState.update { it.copy(isSaving = false, published = true) }
+            try {
+                val author = repository.currentProfile()?.name.orEmpty()
+                cloud.add(
+                    CloudPost(
+                        status = state.status.name,
+                        species = state.species.name,
+                        name = state.name.trim(),
+                        breed = state.breed.trim(),
+                        district = (state.district ?: District.ALMALINSKY).name,
+                        address = state.address.trim(),
+                        marks = state.marks.trim(),
+                        description = state.description.trim(),
+                        emoji = state.emoji,
+                        phone = state.phone.trim(),
+                        author = author,
+                    )
+                )
+                analytics.logPostCreated(state.status.name.lowercase())
+                _uiState.update { it.copy(isSaving = false, published = true) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isSaving = false, publishError = e.toCloudError()) }
+            }
         }
     }
 

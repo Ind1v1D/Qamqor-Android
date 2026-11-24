@@ -33,13 +33,20 @@ class AppShellViewModel(
 
     init {
         viewModelScope.launch {
-            _hasProfile.value = auth.isLoggedIn || repository.currentProfile() != null
+            // Firebase is the only source of truth; drop any stale local profile.
+            if (!auth.isLoggedIn && repository.currentProfile() != null) {
+                repository.clearProfile()
+            }
+            _hasProfile.value = auth.isLoggedIn
         }
     }
 
-    fun signOut() = viewModelScope.launch {
-        auth.logout()
-        withContext(Dispatchers.IO) { photoStore.delete() }
-        _hasProfile.value = false
+    fun signOut(onDone: () -> Unit = {}) {
+        viewModelScope.launch {
+            auth.logout()
+            withContext(Dispatchers.IO) { photoStore.delete() }
+            _hasProfile.value = false
+            onDone()
+        }
     }
 }

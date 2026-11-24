@@ -37,12 +37,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,12 +66,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qamqorapp.R
-import com.example.qamqorapp.data.Post
+import com.example.qamqorapp.data.CloudPost
+import com.example.qamqorapp.data.toPost
 import com.example.qamqorapp.data.ThemeMode
 import com.example.qamqorapp.ui.components.EmojiThumb
 import com.example.qamqorapp.ui.components.ResolvedTag
 import com.example.qamqorapp.ui.components.SelectableChip
 import com.example.qamqorapp.ui.components.StatusTag
+import com.example.qamqorapp.ui.components.TrackScreen
 import com.example.qamqorapp.ui.dialogs.ConfirmDialog
 import com.example.qamqorapp.ui.dialogs.EditProfileDialog
 import org.koin.androidx.compose.koinViewModel
@@ -81,11 +85,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileRoute(
     onSignOut: () -> Unit,
-    onOpenPost: (Long) -> Unit,
+    onOpenPost: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = koinViewModel<ProfileViewModel>()
+    val postsViewModel = koinViewModel<MyPostsViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val myPosts by postsViewModel.uiState.collectAsStateWithLifecycle()
+    val actionError by postsViewModel.actionError.collectAsStateWithLifecycle()
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val language by viewModel.language.collectAsStateWithLifecycle()
     val simulateError by viewModel.simulateError.collectAsStateWithLifecycle()
@@ -96,6 +103,14 @@ fun ProfileRoute(
     var rationaleBefore by rememberSaveable { mutableStateOf(false) }
     var askedBefore by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    TrackScreen("profile")
+
+    LaunchedEffect(actionError) {
+        val error = actionError ?: return@LaunchedEffect
+        Toast.makeText(context, error.messageRes, Toast.LENGTH_LONG).show()
+        postsViewModel.consumeActionError()
+    }
 
     val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         viewModel.onPhotoCaptured(success)
@@ -142,6 +157,7 @@ fun ProfileRoute(
 
     ProfileScreen(
         uiState = state,
+        myPosts = myPosts,
         themeMode = themeMode,
         language = language,
         simulateError = simulateError,
@@ -150,8 +166,8 @@ fun ProfileRoute(
         onTakePhoto = onTakePhoto,
         onRemovePhoto = viewModel::removePhoto,
         onSaveProfile = viewModel::saveProfile,
-        onToggleResolved = viewModel::toggleResolved,
-        onDeletePost = viewModel::delete,
+        onToggleResolved = postsViewModel::toggleResolved,
+        onDeletePost = postsViewModel::delete,
         onSetTheme = viewModel::setTheme,
         onSetLanguage = { tag -> viewModel.setLanguage(tag, context) },
         onToggleSimulateError = viewModel::setSimulateError,
@@ -216,16 +232,17 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 @Composable
 fun ProfileScreen(
     uiState: ProfileUiState,
+    myPosts: MyPostsUiState,
     themeMode: ThemeMode,
     language: String,
     simulateError: Boolean,
-    onOpenPost: (Long) -> Unit,
+    onOpenPost: (String) -> Unit,
     onSignOut: () -> Unit,
     onTakePhoto: () -> Unit,
     onRemovePhoto: () -> Unit,
     onSaveProfile: (String, String) -> Unit,
-    onToggleResolved: (Post) -> Unit,
-    onDeletePost: (Post) -> Unit,
+    onToggleResolved: (CloudPost) -> Unit,
+    onDeletePost: (CloudPost) -> Unit,
     onSetTheme: (ThemeMode) -> Unit,
     onSetLanguage: (String) -> Unit,
     onToggleSimulateError: (Boolean) -> Unit,
@@ -236,6 +253,7 @@ fun ProfileScreen(
     var showEdit by remember { mutableStateOf(false) }
     var showSignOut by remember { mutableStateOf(false) }
     val photoDescription = stringResource(R.string.photo_avatar_description)
+    val cloudPosts = (myPosts as? MyPostsUiState.Success)?.posts.orEmpty()
 
     Box(modifier = modifier.fillMaxSize().background(colors.bg)) {
         Column(
@@ -334,13 +352,13 @@ fun ProfileScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     StatCell(
-                        value = uiState.published,
+                        value = cloudPosts.size,
                         label = stringResource(R.string.stat_published),
                         modifier = Modifier.weight(1f),
                     )
                     VerticalDivider()
                     StatCell(
-                        value = uiState.resolved,
+                        value = cloudPosts.count { it.resolved },
                         label = stringResource(R.string.stat_solved),
                         modifier = Modifier.weight(1f),
                     )
@@ -380,31 +398,32 @@ fun ProfileScreen(
                 )
             }
 
-            if (uiState.myPosts.isEmpty() && !uiState.isLoading) {
-                Text(
-                    text = stringResource(R.string.profile_no_posts),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.inkSoft,
-                    modifier = Modifier.padding(
-                        horizontal = Dimens.ContentPadding.dp,
-                        vertical = 16.dp,
-                    ),
+            when (myPosts) {
+                MyPostsUiState.Loading -> MyPostsMessage(text = stringResource(R.string.my_posts_loading))
+
+                is MyPostsUiState.Error -> MyPostsMessage(
+                    text = stringResource(myPosts.error.messageRes),
+                    color = colors.lostInk,
                 )
-            } else {
-                Column(
-                    modifier = Modifier.padding(
-                        start = Dimens.ContentPadding.dp,
-                        end = Dimens.ContentPadding.dp,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    uiState.myPosts.forEach { post ->
-                        MyPostRow(
-                            post = post,
-                            onClick = { onOpenPost(post.id) },
-                            onToggleResolved = { onToggleResolved(post) },
-                            onDelete = { onDeletePost(post) },
-                        )
+
+                is MyPostsUiState.Success -> if (myPosts.posts.isEmpty()) {
+                    MyPostsMessage(text = stringResource(R.string.profile_no_posts))
+                } else {
+                    Column(
+                        modifier = Modifier.padding(
+                            start = Dimens.ContentPadding.dp,
+                            end = Dimens.ContentPadding.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        myPosts.posts.forEach { post ->
+                            MyPostRow(
+                                post = post,
+                                onClick = { onOpenPost(post.id) },
+                                onToggleResolved = { onToggleResolved(post) },
+                                onDelete = { onDeletePost(post) },
+                            )
+                        }
                     }
                 }
             }
@@ -500,16 +519,33 @@ private fun VerticalDivider() {
 }
 
 @Composable
+private fun MyPostsMessage(
+    text: String,
+    color: androidx.compose.ui.graphics.Color = LocalQamqorColors.current.inkSoft,
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = color,
+        modifier = Modifier.padding(
+            horizontal = Dimens.ContentPadding.dp,
+            vertical = 16.dp,
+        ),
+    )
+}
+
+@Composable
 private fun MyPostRow(
-    post: Post,
+    post: CloudPost,
     onClick: () -> Unit,
     onToggleResolved: () -> Unit,
     onDelete: () -> Unit,
 ) {
     val colors = LocalQamqorColors.current
     val context = LocalContext.current
+    val display = remember(post) { post.toPost() }
 
-    val alpha = if (post.isResolved) 0.55f else 1f
+    val alpha = if (display.isResolved) 0.55f else 1f
 
     Row(
         modifier = Modifier
@@ -524,7 +560,7 @@ private fun MyPostRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Box(modifier = Modifier.alpha(alpha)) {
-            EmojiThumb(post, size = 40)
+            EmojiThumb(display, size = 40)
         }
 
         Column(
@@ -532,9 +568,9 @@ private fun MyPostRow(
                 .weight(1f)
                 .alpha(alpha),
         ) {
-            if (post.isResolved) ResolvedTag() else StatusTag(post.status)
+            if (display.isResolved) ResolvedTag() else StatusTag(display.status)
             Text(
-                text = post.name,
+                text = display.name,
                 style = MaterialTheme.typography.titleSmall,
                 color = colors.ink,
                 maxLines = 1,
@@ -542,8 +578,8 @@ private fun MyPostRow(
             )
             Text(
                 text = buildString {
-                    append(context.getString(post.district.labelRes))
-                    val time = RelativeTime.format(context, post.createdAt)
+                    append(context.getString(display.district.labelRes))
+                    val time = RelativeTime.format(context, display.createdAt)
                     if (time.isNotEmpty()) append(" · ").append(time)
                 },
                 style = MaterialTheme.typography.labelSmall,
@@ -553,7 +589,14 @@ private fun MyPostRow(
             )
         }
 
-        if (!post.isResolved) {
+        if (display.isResolved) {
+            RowActionButton(
+                icon = Icons.Filled.Refresh,
+                tint = colors.inkSoft,
+                onClick = onToggleResolved,
+                contentDescription = stringResource(R.string.profile_mark_active),
+            )
+        } else {
             RowActionButton(
                 icon = Icons.Filled.Check,
                 tint = colors.pine,

@@ -1,5 +1,7 @@
 package com.example.qamqorapp.ui.facts
 
+import com.example.qamqorapp.ui.components.TrackScreen
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +37,8 @@ import com.example.qamqorapp.ui.theme.LocalQamqorColors
 fun PetFactsRoute(modifier: Modifier = Modifier) {
     val viewModel = koinViewModel<PetFactsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    TrackScreen("facts")
 
     PetFactsScreen(
         uiState = uiState,

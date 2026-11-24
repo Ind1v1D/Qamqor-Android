@@ -46,8 +46,10 @@ object Routes {
     const val PROFILE = "profile"
     const val CREATE = "create"
     const val DETAIL = "detail/{postId}"
+    const val MY_POST = "mypost/{postId}"
 
     fun detail(postId: Long) = "detail/$postId"
+    fun myPost(postId: String) = "mypost/$postId"
 }
 private class TopLevelTab(
     val route: String,

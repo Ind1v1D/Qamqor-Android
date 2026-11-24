@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qamqorapp.data.Post
 import com.example.qamqorapp.data.PostRepository
+import com.example.qamqorapp.ui.CloudError
 import com.example.qamqorapp.util.shortName
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,7 @@ data class DetailUiState(
     val author: String = "",
     val isLoading: Boolean = true,
     val missing: Boolean = false,
+    val error: CloudError? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
